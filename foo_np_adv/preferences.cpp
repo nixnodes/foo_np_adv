@@ -26,37 +26,11 @@ BOOL CNPAPreferences::OnInitDialog(CWindow, LPARAM)
 	
 	SendMessage(m_DelaySpin, UDM_SETBUDDY, (WPARAM)(HWND)m_EditDelay, 0);
 	SendMessage(m_DelaySpin, UDM_SETRANGE32, 0, CNPAPreferences::idc_delay_hardlimit);
-	//SendMessage(m_DelaySpin, UDM_SETRANGE, 0, (LPARAM)MAKELONG(CNPAPreferences::idc_delay_hardlimit, 0));
 
 	SetDlgItemInt(IDC_DELAY, 0, false);
 
 	PopulateContextList();
-	
 
-	/*
-	GUID guid;
-
-	CoCreateGuid(&guid);
-
-	pfc::string_formatter str;
-
-	str << "{";
-	str << "0x" << pfc::format_hex(guid.Data1) << ",";
-	str << "0x" << pfc::format_hex(guid.Data2) << ",";
-	str << "0x" << pfc::format_hex(guid.Data3) << ",";
-	str << "{";
-
-	uint32_t i;
-	for (i = 0; i < sizeof(guid.Data4); i++) {
-		str << "0x" << pfc::format_hex(guid.Data4[i]);
-		if (i < sizeof(guid.Data4) - 1)
-			str << ", ";
-	}
-
-	str << "} };";
-
-	console::print(str);
-	*/
 	return FALSE;
 }
 

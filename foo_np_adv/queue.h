@@ -53,11 +53,9 @@ public:
 	Queue() = default;
 	Queue(const Queue&) = delete;            // disable copying
 	Queue& operator=(const Queue&) = delete; // disable assignment
-
-	bool locked = false;
-
 private:
 	std::queue<T> queue_;
 	std::mutex mutex_;
 	std::condition_variable cond_;
+	bool locked = false;
 };

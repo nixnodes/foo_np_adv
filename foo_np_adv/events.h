@@ -7,8 +7,6 @@
 #include <map>
 #include <vector>
 
-#include <math.h>
-
 static std::map<int, std::vector<pfc::string8>> _evtostr = {
 	{EVENT_PLAYBACK_STARTING, {"Playback start","Trigger when playback starts"}},
 	{EVENT_PLAYBACK_NEW_TRACK, {"New track","Trigger when new track starts playing"}},
@@ -22,25 +20,24 @@ static std::map<int, std::vector<pfc::string8>> _evtostr = {
 	{EVENT_VOLCHANGE, {"Volume change",""}},
 };
 
-
 class titleformat_hook_test : public titleformat_hook {
 public:
 	titleformat_hook_test(metadb_handle_ptr p_track) : track(p_track) {}
 
 	bool process_field(titleformat_text_out * p_out, const char * p_name, t_size p_name_length, bool & p_found_flag) {
-		if ( pfc::stricmp_ascii_ex(p_name, p_name_length, "isplaying", ~0) == 0) {
+		if ( pfc::stricmp_ascii_ex(p_name, p_name_length, "isplaying", ~t_size(0)) == 0) {
 			if (m_playback_control->is_playing()) {
 				p_out->write(titleformat_inputtypes::unknown, "1");
 				p_found_flag = true; return true;
 			}
 		}
-		else if (pfc::stricmp_ascii_ex(p_name, p_name_length, "ispaused", ~0) == 0) {
+		else if (pfc::stricmp_ascii_ex(p_name, p_name_length, "ispaused", ~t_size(0)) == 0) {
 			if (m_playback_control->is_paused()) {
 				p_out->write(titleformat_inputtypes::unknown, "1");
 				p_found_flag = true; return true;
 			}
 		}
-		else if (pfc::stricmp_ascii_ex(p_name, p_name_length, "playback_time", ~0) == 0) {
+		else if (pfc::stricmp_ascii_ex(p_name, p_name_length, "playback_time", ~t_size(0)) == 0) {
 			pfc::string_formatter s;
 			t_int64 total = (t_int64)m_playback_control->playback_get_position(), seconds, hours, minutes;
 			minutes = total / 60;
@@ -56,15 +53,15 @@ public:
 			p_out->write(titleformat_inputtypes::unknown, s);
 			p_found_flag = true; return true;
 		}				
-		else if (pfc::stricmp_ascii_ex(p_name, p_name_length, "title", ~0) == 0 ||
-			pfc::stricmp_ascii_ex(p_name, p_name_length, "artist", ~0) == 0 ||
-			pfc::stricmp_ascii_ex(p_name, p_name_length, "album", ~0) == 0) {
+		else if (pfc::stricmp_ascii_ex(p_name, p_name_length, "title", ~t_size(0)) == 0 ||
+			pfc::stricmp_ascii_ex(p_name, p_name_length, "artist", ~t_size(0)) == 0 ||
+			pfc::stricmp_ascii_ex(p_name, p_name_length, "album", ~t_size(0)) == 0) {
 			if (!m_playback_control->is_playing()) {
 				p_out->write(titleformat_inputtypes::unknown, "");
 				p_found_flag = true; return true;
 			}
 		}
-		else if (pfc::stricmp_ascii_ex(p_name, p_name_length, "volume", ~0) == 0) {
+		else if (pfc::stricmp_ascii_ex(p_name, p_name_length, "volume", ~t_size(0)) == 0) {
 			pfc::string8 s;
 			s << m_playback_control->get_volume();
 			p_out->write(titleformat_inputtypes::unknown, s );
@@ -82,11 +79,12 @@ public:
 		}
 		*/
 
-		p_found_flag = false; return false;
-		
+		p_found_flag = false; return false;		
 	}
 
-	bool process_function(titleformat_text_out * p_out, const char * p_name, t_size p_name_length, titleformat_hook_function_params * p_params, bool & p_found_flag) { return false; }
+	bool process_function(titleformat_text_out * p_out, const char * p_name, t_size p_name_length, titleformat_hook_function_params * p_params, bool & p_found_flag) { 
+		p_found_flag = false; return false;
+	}
 
 private:
 	static_api_ptr_t<playback_control> m_playback_control;
@@ -99,7 +97,7 @@ typedef struct event_item_s {
 
 	event_item_s(instance_item *p_item) {
 		item = *p_item;
-		static_api_ptr_t<titleformat_compiler>()->compile_safe_ex(m_script, item.format_string);
+		static_api_ptr_t<titleformat_compiler>()->compile_safe_ex(m_script, p_item->format_string);
 	}
 	event_item_s() {}
 
@@ -131,47 +129,41 @@ public:
 	metadb_handle_ptr last_track{ 0 };
 private:
 	virtual void on_playback_starting(play_control::t_track_command p_command, bool p_paused) {
-		event_pre(EVENT_PLAYBACK_STARTING);
+		event_update(EVENT_PLAYBACK_STARTING);
 	};
 	virtual void on_playback_new_track(metadb_handle_ptr p_track) {
 		last_track = p_track;
-		event_pre(EVENT_PLAYBACK_NEW_TRACK);
+		event_update(EVENT_PLAYBACK_NEW_TRACK);
 		
 	}
 	virtual void on_playback_stop(play_control::t_stop_reason p_reason) {
 		if (p_reason != play_control::stop_reason_starting_another) {
-			event_pre(EVENT_PLAYBACK_STOP);
+			event_update(EVENT_PLAYBACK_STOP);
 		}
 	}
 	virtual void on_playback_pause(bool p_state) {
-		event_pre(EVENT_PLAYBACK_PAUSE);
+		event_update(EVENT_PLAYBACK_PAUSE);
 	}
 	virtual void on_playback_seek(double p_time) {
-		event_pre(EVENT_PLAYBACK_SEEK);
+		event_update(EVENT_PLAYBACK_SEEK);
 	}
 	virtual void on_playback_edited(metadb_handle_ptr p_track) {
-		event_pre(EVENT_PLAYBACK_EDITED);
+		event_update(EVENT_PLAYBACK_EDITED);
 	}
 	virtual void on_playback_dynamic_info(const file_info & p_info) {
-		event_pre(EVENT_PLAYBACK_DINFO);
+		event_update(EVENT_PLAYBACK_DINFO);
 	}
 	virtual void on_playback_dynamic_info_track(const file_info & p_info) {
-		event_pre(EVENT_PLAYBACK_DINFO_TRACK);
+		event_update(EVENT_PLAYBACK_DINFO_TRACK);
 	}
 	virtual void on_playback_time(double p_time) {
-		event_pre(EVENT_PLAYBACK_TIME);
+		event_update(EVENT_PLAYBACK_TIME);
 	}
 	virtual void on_volume_change(float p_new_val) {
-		event_pre(EVENT_VOLCHANGE);
-	}
-
-	void event_pre(uint32_t event)
-	{
-		event_update(event);
+		event_update(EVENT_VOLCHANGE);
 	}
 
 	virtual void event_update(uint32_t event) {}
-
 };
 
 class CEvents : private CEventsBase {
@@ -183,8 +175,7 @@ private:
 
 	virtual void event_update(uint32_t event);
 
-	std::map<pfc::string8, event_item> m_instancemap[EVENT_COUNT];
-	
+	std::map<pfc::string8, event_item> m_instancemap[EVENT_COUNT];	
 };
 
 class IEvents {

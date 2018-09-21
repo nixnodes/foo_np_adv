@@ -5,7 +5,6 @@
 #include "events.h"
 #include "prefs_instance.h"
 
-
 class CNPAPreferences : public CDialogImpl<CNPAPreferences>,
 	public preferences_page_instance,
 	private CEventsBase {
@@ -68,7 +67,6 @@ private:
 		for (int i = 0; i < EVENT_COUNT; i++) {
 			event_flags[i] = false;
 		}
-		event_flags[EVENT_PLAYBACK_STARTING] = true;
 		event_flags[EVENT_PLAYBACK_STOP] = true;
 		event_flags[EVENT_PLAYBACK_PAUSE] = true;
 		event_flags[EVENT_PLAYBACK_NEW_TRACK] = true;

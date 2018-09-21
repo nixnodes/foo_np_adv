@@ -4,7 +4,7 @@
 #include "events.h"
 #include "queue.h"
 
-#include <future>
+#include <atomic>
 
 #define F_WRITER_APPEND		(uint32_t) 0x00000001
 #define F_WRITER_ABORT		(uint32_t) 0x00000002
@@ -23,8 +23,6 @@ typedef struct write_job_s {
 
 } write_job;
 
-
-
 class CWriter {
 public:
 	CWriter() {
@@ -32,7 +30,7 @@ public:
 	}
 	~CWriter()
 	{
-		pending_destroy = 1;
+		p_Destroy = 1;
 		cv_quit.notify_all();
 		write_job j(F_WRITER_ABORT);
 		q.push(j, true);
@@ -51,8 +49,7 @@ private:
 
 	static std::condition_variable cv_quit;
 	static std::mutex cvq_mutex;
-	static std::atomic<int> pending_destroy;
-
+	static std::atomic<int> p_Destroy;
 };
 
 class IWriter {
@@ -62,6 +59,7 @@ public:
 			m_Writer = new CWriter();
 		}
 	}
+
 	static void Destroy() {
 		if (m_Writer != nullptr) {
 			delete m_Writer;

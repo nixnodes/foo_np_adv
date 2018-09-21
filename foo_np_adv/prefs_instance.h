@@ -57,11 +57,7 @@ typedef struct instance_item_s {
 		events[EVENT_PLAYBACK_PAUSE] = true;
 		events[EVENT_PLAYBACK_NEW_TRACK] = true;
 	}
-	/*
-	bool operator!=(instance_item &other) {
-		return bool(name != other.name || value != other.value || contextmenu != other.contextmenu);
-	}
-	*/
+
 } instance_item;
 
 
