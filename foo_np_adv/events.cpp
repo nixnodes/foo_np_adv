@@ -46,7 +46,7 @@ void CEvents::event_update(uint32_t event) {
 		}
 
 		if (p.second.item.write_to_file) {
-			write_job j(p.second.item.filename, state, p.second.item.log_mode ? F_WRITER_APPEND : 0);
+			write_job j(p.second.item.filename, state, flags);
 			if (p.second.item.enable_delay) {
 				IWriter::WriteAsync(&j, p.second.item.delay);
 			}
