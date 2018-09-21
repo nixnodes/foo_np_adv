@@ -1,9 +1,6 @@
 [submodule "foobar2000_sdk"]
 	path = foobar2000_sdk
 	url = https://github.com/nixnodes/foobar2000_sdk
-[submodule "WTL10"]
-	path = WTL10
-	url = https://github.com/nixnodes/WTL10
 [submodule "WTL10_7336"]
 	path = WTL10_7336
 	url = https://github.com/nixnodes/WTL10
