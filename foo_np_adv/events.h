@@ -7,6 +7,8 @@
 #include <map>
 #include <vector>
 
+#include <time.h> 
+
 static std::map<int, std::vector<pfc::string8>> _evtostr = {
 	{EVENT_PLAYBACK_STARTING, {"Playback start","Trigger when playback starts"}},
 	{EVENT_PLAYBACK_NEW_TRACK, {"New track","Trigger when new track starts playing"}},
@@ -29,6 +31,18 @@ public:
 			pfc::string8 s;
 			s << m_playback_control->get_volume();
 			p_out->write(titleformat_inputtypes::unknown, s);
+			TR_RETURN(true)
+		}
+		else if (pfc::stricmp_ascii_ex(p_name, p_name_length, "datetime", ~t_size(0)) == 0) {
+			time_t rawtime;
+			struct tm timeinfo;
+			char buffer[80];
+
+			time(&rawtime);
+			localtime_s(&timeinfo, &rawtime);
+
+			strftime(buffer, sizeof(buffer), "%c", &timeinfo);
+			p_out->write(titleformat_inputtypes::unknown, buffer);
 			TR_RETURN(true)
 		}
 		TR_RETURN(false)
