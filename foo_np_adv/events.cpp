@@ -36,16 +36,21 @@ void CEvents::event_update(uint32_t event) {
 
 		titleformat_object::ptr m_script = p.second.m_script;
 		pfc::string8 state = format_title(m_script);
-		uint32_t flags;
-		if (p.second.item.log_mode) {
-			flags |= F_WRITER_APPEND;
-			state << "\n";
-		}
-		else {
-			flags = 0;
-		}
-
+		
 		if (p.second.item.write_to_file) {
+			uint32_t flags;
+
+			if (p.second.item.log_mode) {
+				flags |= F_WRITER_APPEND;
+				if (state.length() == 0) {
+					continue;
+				}
+				state << "\n";
+			}
+			else {
+				flags = 0;
+			}
+
 			write_job j(p.second.item.filename, state, flags);
 			if (p.second.item.enable_delay) {
 				IWriter::WriteAsync(&j, p.second.item.delay);

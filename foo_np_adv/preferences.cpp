@@ -108,12 +108,13 @@ void CNPAPreferences::OnComboSelChange(UINT, int, CWindow)
 		return;
 	}
 
+	m_script.release();
+
 	instance_item item = g_cfg_instance_list.get_item(index);
 
 	uSetDlgItemText(*this, IDC_FILENAME, item.filename);
 	uSetDlgItemText(*this, IDC_PATTERN, item.format_string);
-	uSetDlgItemText(*this, IDC_ON_EXIT, item.on_exit_str);
-	m_script.release();
+	uSetDlgItemText(*this, IDC_ON_EXIT, item.on_exit_str);	
 	m_CheckBoxWriteToFile.SetCheck(item.write_to_file ? 1 : 0);
 	m_CheckBoxLogMode.SetCheck(item.log_mode ? 1 : 0);
 	m_CheckBoxDelay.SetCheck(item.enable_delay ? 1 : 0);
