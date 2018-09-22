@@ -95,10 +95,14 @@ bool titleformat_hook_glob::process_function(titleformat_text_out * p_out, const
 		pfc::string8 fmt;
 		const char *p = field_name;
 
+		// sanitize format string to avoid segfaults in C strftime
 		for (t_size i = 0; i < field_name_length; i++) {
 			char c = field_name[i];
-			if (c == '%' && i < field_name_length - 1) {
+			if (c == '%') {
 				i++;
+				if (i == field_name_length) {
+					break;
+				}
 				c = field_name[i];
 				if (CDateTime::is_fs_allowed(c)) {
 					fmt << "%" << std::string(1, c).c_str();
@@ -108,7 +112,6 @@ bool titleformat_hook_glob::process_function(titleformat_text_out * p_out, const
 				fmt << std::string(1, c).c_str();
 			}
 		}
-
 		p_out->write(titleformat_inputtypes::unknown, CDateTime().fmt(fmt));
 		TR_RETURN(true)
 	}
