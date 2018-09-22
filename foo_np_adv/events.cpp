@@ -41,7 +41,7 @@ void CEvents::event_update(uint32_t event) {
 			uint32_t flags;
 
 			if (p.second.item.log_mode) {
-				flags |= F_WRITER_APPEND;
+				flags = F_WRITER_APPEND;
 				if (state.length() == 0) {
 					continue;
 				}
