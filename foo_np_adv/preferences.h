@@ -76,7 +76,7 @@ private:
 		event_flags[EVENT_PLAYBACK_NEW_TRACK] = true;
 	}
 
-	virtual void event_update(uint32_t event) {		
+	virtual void event_update(uint32_t event) {
 		PatternPreviewUpdate(event);
 	}
 
@@ -94,7 +94,7 @@ private:
 	CButton m_ButtonEvent;
 	CButton m_ButtonFileChooser;
 	CWindow m_DelaySpin;
-	
+
 	const preferences_page_callback::ptr m_callback;
 	titleformat_object::ptr m_script;
 
@@ -103,9 +103,9 @@ private:
 	static const INT idc_delay_hardlimit = 3600000;
 };
 
-class IConfig{
+class IConfig {
 public:
-	
+
 	static t_size Count()
 	{
 		return m_cfg_objlist->get_count();

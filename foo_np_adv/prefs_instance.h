@@ -17,7 +17,7 @@ typedef struct instance_item_s {
 	uint8_t encoding;
 
 	instance_item_s(const char * p_name, const char * p_filename, const char * p_format_string,
-		const bool p_write_to_file, const bool p_log_mode, const bool p_enable_delay, const uint32_t p_delay, 
+		const bool p_write_to_file, const bool p_log_mode, const bool p_enable_delay, const uint32_t p_delay,
 		const bool(&p_events)[EVENT_COUNT], const bool p_on_exit, const char *p_on_exit_str, const uint8_t p_encoding)
 		: name(p_name), filename(p_filename), format_string(p_format_string), log_mode(p_log_mode),
 		enable_delay(p_enable_delay), delay(p_delay), on_exit(p_on_exit), on_exit_str(p_on_exit_str), encoding(p_encoding)
@@ -28,11 +28,11 @@ typedef struct instance_item_s {
 			console::print(str << p_events[i]);
 		}
 	}
-	instance_item_s(const char * p_name, const char * p_filename, const char * p_format_string, const bool p_write_to_file, 
+	instance_item_s(const char * p_name, const char * p_filename, const char * p_format_string, const bool p_write_to_file,
 		const bool p_log_mode, const bool p_enable_delay, const uint32_t p_delay, const std::initializer_list <uint32_t> p_events,
 		const bool p_on_exit, const char *p_on_exit_str, const uint8_t p_encoding)
-		: name(p_name), filename(p_filename), format_string(p_format_string), log_mode(p_log_mode), 
-		enable_delay(p_enable_delay), delay(p_delay), write_to_file(p_write_to_file), on_exit(p_on_exit), 
+		: name(p_name), filename(p_filename), format_string(p_format_string), log_mode(p_log_mode),
+		enable_delay(p_enable_delay), delay(p_delay), write_to_file(p_write_to_file), on_exit(p_on_exit),
 		on_exit_str(p_on_exit_str), encoding(p_encoding)
 	{
 		reset_events();
@@ -67,7 +67,7 @@ typedef struct instance_item_s {
 
 FB2K_STREAM_READER_OVERLOAD(instance_item) {
 	stream >> value.name >> value.filename >> value.format_string >>
-		value.write_to_file >> value.log_mode >> value.enable_delay >> 
+		value.write_to_file >> value.log_mode >> value.enable_delay >>
 		value.delay >> value.events >> value.on_exit >> value.on_exit_str >>
 		value.encoding;
 	return stream;
@@ -75,7 +75,7 @@ FB2K_STREAM_READER_OVERLOAD(instance_item) {
 
 FB2K_STREAM_WRITER_OVERLOAD(instance_item) {
 	stream << value.name << value.filename << value.format_string <<
-		value.write_to_file << value.log_mode << value.enable_delay << 
+		value.write_to_file << value.log_mode << value.enable_delay <<
 		value.delay << value.events << value.on_exit << value.on_exit_str <<
 		value.encoding;
 	return stream;

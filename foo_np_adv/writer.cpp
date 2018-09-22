@@ -50,10 +50,10 @@ void CWriter::Write(write_job *j) {
 void CWriter::QueueWriteAsync(const write_job *j, long long delay) {
 	std::thread([](const write_job j, CWriter *c, long long t) {
 		std::unique_lock<std::mutex> lk(CWriter::cvq_mutex);
-		CWriter::cv_quit.wait_for(lk, std::chrono::milliseconds(t), 
+		CWriter::cv_quit.wait_for(lk, std::chrono::milliseconds(t),
 			[] {return CWriter::p_Destroy == 1; }
-		);		
+		);
 		c->q.push(j);
 	}, *j, this, delay).detach();
-	
+
 }

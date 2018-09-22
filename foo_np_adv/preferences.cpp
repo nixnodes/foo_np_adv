@@ -19,19 +19,20 @@ BOOL CNPAPreferences::OnInitDialog(CWindow, LPARAM)
 	m_ButtonAddInstance = GetDlgItem(IDC_BUTTON1);
 	m_ButtonRemoveInstance = GetDlgItem(IDC_BUTTON2);
 	m_ButtonFileChooser = GetDlgItem(IDC_BUTTON3);
-	m_ButtonEvent = GetDlgItem(IDC_CONTEXTMENU);  
+	m_ButtonEvent = GetDlgItem(IDC_CONTEXTMENU);
 	m_EditDelay = GetDlgItem(IDC_DELAY);
 	m_CheckBoxDelay = GetDlgItem(IDC_CHECK3);
 	m_DelaySpin = GetDlgItem(IDC_SPIN1);
 	m_CheckBoxOnExit = GetDlgItem(IDC_CHECK4);
 	m_EditOnExit = GetDlgItem(IDC_ON_EXIT);
-	
+
 	SendMessage(m_DelaySpin, UDM_SETBUDDY, (WPARAM)(HWND)m_EditDelay, 0);
 	SendMessage(m_DelaySpin, UDM_SETRANGE32, 0, CNPAPreferences::idc_delay_hardlimit);
 
 	SetDlgItemInt(IDC_DELAY, 0, false);
 
 	PopulateContextList();
+
 
 	return FALSE;
 }
@@ -64,13 +65,13 @@ void CNPAPreferences::ResetToUnselectedState()
 	SetDlgItemInt(IDC_DELAY, 0);
 	m_script.release();
 	m_CheckBoxWriteToFile.SetCheck(0);
-	m_CheckBoxLogMode.SetCheck(0);	
+	m_CheckBoxLogMode.SetCheck(0);
 	m_EditPattern.EnableWindow(false);
 	m_ButtonEvent.EnableWindow(false);
 	m_EditFilename.EnableWindow(false);
 	m_CheckBoxWriteToFile.EnableWindow(false);
 	m_CheckBoxLogMode.EnableWindow(false);
-	m_ButtonFileChooser.EnableWindow(false);	
+	m_ButtonFileChooser.EnableWindow(false);
 	m_ButtonAddInstance.EnableWindow(false);
 	m_ButtonRemoveInstance.EnableWindow(false);
 	m_CheckBoxDelay.EnableWindow(false);
@@ -88,7 +89,7 @@ void CNPAPreferences::ResetToDefault()
 	SetDlgItemInt(IDC_DELAY, 0);
 	m_script.release();
 	m_CheckBoxWriteToFile.SetCheck(0);
-	m_CheckBoxLogMode.SetCheck(0);	
+	m_CheckBoxLogMode.SetCheck(0);
 	m_EditFilename.EnableWindow(false);
 	m_CheckBoxWriteToFile.EnableWindow(false);
 	m_CheckBoxLogMode.EnableWindow(false);
@@ -114,7 +115,7 @@ void CNPAPreferences::OnComboSelChange(UINT, int, CWindow)
 
 	uSetDlgItemText(*this, IDC_FILENAME, item.filename);
 	uSetDlgItemText(*this, IDC_PATTERN, item.format_string);
-	uSetDlgItemText(*this, IDC_ON_EXIT, item.on_exit_str);	
+	uSetDlgItemText(*this, IDC_ON_EXIT, item.on_exit_str);
 	m_CheckBoxWriteToFile.SetCheck(item.write_to_file ? 1 : 0);
 	m_CheckBoxLogMode.SetCheck(item.log_mode ? 1 : 0);
 	m_CheckBoxDelay.SetCheck(item.enable_delay ? 1 : 0);
@@ -238,13 +239,13 @@ void CNPAPreferences::SetControlAvailabilityFile()
 		m_CheckBoxLogMode.EnableWindow(false);
 		m_ButtonFileChooser.EnableWindow(false);
 		m_CheckBoxDelay.EnableWindow(false);
-	}	
+	}
 	SetControlAvailabilityDelay();
 }
 
 void CNPAPreferences::SetControlAvailabilityDelay()
-{	
-	if (m_CheckBoxWriteToFile.IsChecked() && 
+{
+	if (m_CheckBoxWriteToFile.IsChecked() &&
 		m_CheckBoxDelay.IsChecked()) {
 		m_DelaySpin.EnableWindow(true);
 		m_EditDelay.EnableWindow(true);
@@ -281,10 +282,10 @@ void CNPAPreferences::OnCheckBoxOnExitClicked(UINT, int, CWindow) {
 	OnChanged();
 }
 
-void CNPAPreferences::OnBnClickedFileChooser(UINT, int, CWindow) 
+void CNPAPreferences::OnBnClickedFileChooser(UINT, int, CWindow)
 {
 	OPENFILENAME ofn;
-	LPWSTR szFile = (LPWSTR) malloc(MAX_PATH);
+	LPWSTR szFile = (LPWSTR)malloc(MAX_PATH);
 
 	ZeroMemory(szFile, sizeof(szFile));
 	ZeroMemory(&ofn, sizeof(ofn));
@@ -302,10 +303,10 @@ void CNPAPreferences::OnBnClickedFileChooser(UINT, int, CWindow)
 		OnChanged();
 	}
 
-	free(szFile);	
+	free(szFile);
 }
 
-void CNPAPreferences::OnEditPatternChange(UINT, int, CWindow) 
+void CNPAPreferences::OnEditPatternChange(UINT, int, CWindow)
 {
 	m_script.release();
 	OnChanged();
@@ -314,7 +315,7 @@ void CNPAPreferences::OnEditPatternChange(UINT, int, CWindow)
 void CNPAPreferences::OnEditDelayChange(UINT, int, CWindow) {
 	if (GetDlgItemInt(IDC_DELAY, false) > CNPAPreferences::idc_delay_hardlimit) {
 		SetDlgItemInt(IDC_DELAY, CNPAPreferences::idc_delay_hardlimit, false);
-	}	
+	}
 	OnChanged();
 }
 
@@ -391,7 +392,7 @@ void CNPAPreferences::apply()
 	item.filename = str;
 
 	uGetDlgItemText(*this, IDC_PATTERN, str);
-	item.format_string = str;	
+	item.format_string = str;
 	uGetDlgItemText(*this, IDC_ON_EXIT, str);
 	item.on_exit_str = str;
 	item.write_to_file = m_CheckBoxWriteToFile.IsChecked();
@@ -405,7 +406,7 @@ void CNPAPreferences::apply()
 	}
 
 	g_cfg_instance_list.replace_item(curIndex, item);
-	IEvents::UpdateInstance(&item);	
+	IEvents::UpdateInstance(&item);
 
 	OnChanged();
 }
@@ -435,11 +436,11 @@ bool CNPAPreferences::HasChanged()
 	if (m_CheckBoxOnExit.IsChecked() != item.on_exit) {
 		return true;
 	}
-	
+
 	if ((uint32_t)GetDlgItemInt(IDC_DELAY, false) != item.delay) {
 		return true;
 	}
-	
+
 	pfc::string8 str;
 
 	uGetDlgItemText(*this, IDC_FILENAME, str);
@@ -472,7 +473,7 @@ void CNPAPreferences::OnChanged()
 	m_callback->on_state_changed();
 }
 
-void CNPAPreferences::PatternPreviewUpdate(uint32_t event, bool force )
+void CNPAPreferences::PatternPreviewUpdate(uint32_t event, bool force)
 {
 	bool trigger;
 	if (force || m_script.is_empty()) {

@@ -34,7 +34,7 @@ void CEvents::event_update(uint32_t event) {
 	for (const auto &p : m_instancemap[event]) {
 		titleformat_object::ptr m_script = p.second.m_script;
 		pfc::string8 state = format_title(m_script);
-		
+
 		if (p.second.item.write_to_file) {
 			uint32_t flags;
 

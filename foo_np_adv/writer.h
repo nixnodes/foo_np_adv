@@ -14,7 +14,7 @@ typedef struct write_job_s {
 	pfc::string8 data;
 	uint32_t flags = 0;
 
-	write_job_s(pfc::string8 p_file,  pfc::string8 p_data, uint32_t p_flags) :
+	write_job_s(pfc::string8 p_file, pfc::string8 p_data, uint32_t p_flags) :
 		file(p_file), data(p_data), flags(p_flags) {}
 	write_job_s(pfc::string8 p_file, pfc::string8 p_data) :
 		file(p_file), data(p_data) {}
@@ -42,7 +42,7 @@ public:
 	static void Write(write_job *j);
 
 private:
-	void worker();	
+	void worker();
 
 	std::thread *t;
 	Queue<write_job> q;
