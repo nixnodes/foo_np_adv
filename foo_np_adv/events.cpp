@@ -32,8 +32,6 @@ void CEvents::RemoveInstance(pfc::string8 name) {
 
 void CEvents::event_update(uint32_t event) {
 	for (const auto &p : m_instancemap[event]) {
-		pfc::string_formatter str;
-
 		titleformat_object::ptr m_script = p.second.m_script;
 		pfc::string8 state = format_title(m_script);
 		
