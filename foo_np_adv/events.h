@@ -122,7 +122,6 @@ public:
 		return state;
 	}
 
-	static_api_ptr_t<playback_control> m_playback_control;
 	metadb_handle_ptr last_track;
 private:
 	virtual void on_playback_starting(play_control::t_track_command p_command, bool p_paused) {
@@ -160,6 +159,8 @@ private:
 	}
 
 	virtual void event_update(uint32_t event) {}
+
+	static_api_ptr_t<playback_control> m_playback_control;
 };
 
 class CEvents : private CEventsBase {

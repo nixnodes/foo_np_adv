@@ -56,7 +56,7 @@ private:
 	void OnEditPatternChange(UINT, int, CWindow);
 	void OnEditDelayChange(UINT, int, CWindow);
 	void OnContextMenu(CWindow wnd, CPoint point);
-	void PatternPreviewUpdate(uint32_t ev);
+	void PatternPreviewUpdate(uint32_t event, bool force = false);
 	bool HasChanged();
 	void OnChanged();
 	void PopulateContextList();
@@ -97,7 +97,6 @@ private:
 	
 	const preferences_page_callback::ptr m_callback;
 	titleformat_object::ptr m_script;
-	static_api_ptr_t<playback_control> m_playback_control;
 
 	bool event_flags[EVENT_COUNT];
 

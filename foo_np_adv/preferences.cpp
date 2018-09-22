@@ -468,14 +468,14 @@ bool CNPAPreferences::HasChanged()
 
 void CNPAPreferences::OnChanged()
 {
-	PatternPreviewUpdate(-1);
+	PatternPreviewUpdate(0, true);
 	m_callback->on_state_changed();
 }
 
-void CNPAPreferences::PatternPreviewUpdate(uint32_t event)
+void CNPAPreferences::PatternPreviewUpdate(uint32_t event, bool force )
 {
 	bool trigger;
-	if (m_script.is_empty()) {
+	if (force || m_script.is_empty()) {
 		pfc::string8 pattern;
 		uGetDlgItemText(*this, IDC_PATTERN, pattern);
 		static_api_ptr_t<titleformat_compiler>()->compile_safe_ex(m_script, pattern);
