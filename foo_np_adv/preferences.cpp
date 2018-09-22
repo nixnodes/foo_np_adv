@@ -15,7 +15,7 @@ BOOL CNPAPreferences::OnInitDialog(CWindow, LPARAM)
 	m_CheckBoxLogMode = GetDlgItem(IDC_CHECK1);
 	m_CheckBoxWriteToFile = GetDlgItem(IDC_CHECK2);
 	m_EditFilename = GetDlgItem(IDC_FILENAME);
-	m_Pattern = GetDlgItem(IDC_PATTERN);
+	m_EditPattern = GetDlgItem(IDC_PATTERN);
 	m_ButtonAddInstance = GetDlgItem(IDC_BUTTON1);
 	m_ButtonRemoveInstance = GetDlgItem(IDC_BUTTON2);
 	m_ButtonFileChooser = GetDlgItem(IDC_BUTTON3);
@@ -23,6 +23,8 @@ BOOL CNPAPreferences::OnInitDialog(CWindow, LPARAM)
 	m_EditDelay = GetDlgItem(IDC_DELAY);
 	m_CheckBoxDelay = GetDlgItem(IDC_CHECK3);
 	m_DelaySpin = GetDlgItem(IDC_SPIN1);
+	m_CheckBoxOnExit = GetDlgItem(IDC_CHECK4);
+	m_EditOnExit = GetDlgItem(IDC_ON_EXIT);
 	
 	SendMessage(m_DelaySpin, UDM_SETBUDDY, (WPARAM)(HWND)m_EditDelay, 0);
 	SendMessage(m_DelaySpin, UDM_SETRANGE32, 0, CNPAPreferences::idc_delay_hardlimit);
@@ -63,7 +65,7 @@ void CNPAPreferences::ResetToUnselectedState()
 	m_script.release();
 	m_CheckBoxWriteToFile.SetCheck(0);
 	m_CheckBoxLogMode.SetCheck(0);	
-	m_Pattern.EnableWindow(false);
+	m_EditPattern.EnableWindow(false);
 	m_ButtonEvent.EnableWindow(false);
 	m_EditFilename.EnableWindow(false);
 	m_CheckBoxWriteToFile.EnableWindow(false);
@@ -74,6 +76,8 @@ void CNPAPreferences::ResetToUnselectedState()
 	m_CheckBoxDelay.EnableWindow(false);
 	m_EditDelay.EnableWindow(false);
 	m_DelaySpin.EnableWindow(false);
+	m_CheckBoxOnExit.EnableWindow(false);
+	m_EditOnExit.EnableWindow(false);
 	ResetFlags();
 }
 
@@ -92,6 +96,7 @@ void CNPAPreferences::ResetToDefault()
 	m_CheckBoxDelay.EnableWindow(false);
 	m_EditDelay.EnableWindow(false);
 	m_DelaySpin.EnableWindow(false);
+	m_EditOnExit.EnableWindow(false);
 	ResetFlags();
 }
 
@@ -107,18 +112,20 @@ void CNPAPreferences::OnComboSelChange(UINT, int, CWindow)
 
 	uSetDlgItemText(*this, IDC_FILENAME, item.filename);
 	uSetDlgItemText(*this, IDC_PATTERN, item.format_string);
+	uSetDlgItemText(*this, IDC_ON_EXIT, item.on_exit_str);
 	m_script.release();
 	m_CheckBoxWriteToFile.SetCheck(item.write_to_file ? 1 : 0);
 	m_CheckBoxLogMode.SetCheck(item.log_mode ? 1 : 0);
 	m_CheckBoxDelay.SetCheck(item.enable_delay ? 1 : 0);
+	m_CheckBoxOnExit.SetCheck(item.on_exit ? 1 : 0);
 	SetDlgItemInt(IDC_DELAY, item.delay);
 
 	for (int i = 0; i < EVENT_COUNT; i++) {
 		event_flags[i] = item.events[i];
 	}
 
-	if (!m_Pattern.IsWindowEnabled()) {
-		m_Pattern.EnableWindow(true);
+	if (!m_EditPattern.IsWindowEnabled()) {
+		m_EditPattern.EnableWindow(true);
 	}
 	if (!m_ButtonEvent.IsWindowEnabled()) {
 		m_ButtonEvent.EnableWindow(true);
@@ -129,8 +136,12 @@ void CNPAPreferences::OnComboSelChange(UINT, int, CWindow)
 	if (!m_ButtonFileChooser.IsWindowEnabled()) {
 		m_ButtonFileChooser.EnableWindow(true);
 	}
+	if (!m_CheckBoxOnExit.IsWindowEnabled()) {
+		m_CheckBoxOnExit.EnableWindow(true);
+	}
 
 	SetControlAvailabilityFile();
+	SetControlAvailabilityOnExit();
 
 	m_ButtonAddInstance.EnableWindow(false);
 	m_ButtonRemoveInstance.EnableWindow(true);
@@ -182,7 +193,7 @@ void CNPAPreferences::OnBnClickedAdd(UINT, int, CWindow)
 		}
 	}
 
-	instance_item item((pfc::string8) pszCAS, "", "", false, false, false, 0, {});
+	instance_item item((pfc::string8) pszCAS, "", "", false, false, false, 0, {}, false, "", 0);
 	g_cfg_instance_list.add_item(item);
 	m_ComboBoxInstance.InsertString(m_ComboBoxInstance.GetCount(), str);
 	m_ComboBoxInstance.SetCurSel(m_ComboBoxInstance.GetCount() - 1);
@@ -243,15 +254,29 @@ void CNPAPreferences::SetControlAvailabilityDelay()
 	}
 }
 
-void CNPAPreferences::OnCheckFileClicked(UINT, int, CWindow)
+void CNPAPreferences::SetControlAvailabilityOnExit() {
+	if (m_CheckBoxOnExit.IsChecked()) {
+		m_EditOnExit.EnableWindow(true);
+	}
+	else {
+		m_EditOnExit.EnableWindow(false);
+	}
+}
+
+void CNPAPreferences::OnCheckBoxFileClicked(UINT, int, CWindow)
 {
 	SetControlAvailabilityFile();
 	OnChanged();
 }
 
-void CNPAPreferences::OnCheckDelayClicked(UINT, int, CWindow)
+void CNPAPreferences::OnCheckBoxDelayClicked(UINT, int, CWindow)
 {
 	SetControlAvailabilityDelay();
+	OnChanged();
+}
+
+void CNPAPreferences::OnCheckBoxOnExitClicked(UINT, int, CWindow) {
+	SetControlAvailabilityOnExit();
 	OnChanged();
 }
 
@@ -366,9 +391,12 @@ void CNPAPreferences::apply()
 
 	uGetDlgItemText(*this, IDC_PATTERN, str);
 	item.format_string = str;	
+	uGetDlgItemText(*this, IDC_ON_EXIT, str);
+	item.on_exit_str = str;
 	item.write_to_file = m_CheckBoxWriteToFile.IsChecked();
 	item.log_mode = m_CheckBoxLogMode.IsChecked();
 	item.enable_delay = m_CheckBoxDelay.IsChecked();
+	item.on_exit = m_CheckBoxOnExit.IsChecked();
 	item.delay = (uint32_t)GetDlgItemInt(IDC_DELAY, false);
 
 	for (int i = 0; i < EVENT_COUNT; i++) {
@@ -402,21 +430,29 @@ bool CNPAPreferences::HasChanged()
 	if (m_CheckBoxDelay.IsChecked() != item.enable_delay) {
 		return true;
 	}
+
+	if (m_CheckBoxOnExit.IsChecked() != item.on_exit) {
+		return true;
+	}
 	
 	if ((uint32_t)GetDlgItemInt(IDC_DELAY, false) != item.delay) {
 		return true;
 	}
-
+	
 	pfc::string8 str;
-	uGetDlgItemText(*this, IDC_FILENAME, str);
 
+	uGetDlgItemText(*this, IDC_FILENAME, str);
 	if (str != item.filename) {
 		return true;
 	}
 
 	uGetDlgItemText(*this, IDC_PATTERN, str);
-
 	if (str != item.format_string) {
+		return true;
+	}
+
+	uGetDlgItemText(*this, IDC_ON_EXIT, str);
+	if (str != item.on_exit_str) {
 		return true;
 	}
 

@@ -6,11 +6,18 @@
 class npa_initquit : public initquit {
 public:
 	void on_init() {
-		console::print(COMMON_NAME " - plugin initialized");
+		console::info(COMMON_NAME " - plugin initialized");
 	}
 	void on_quit() {
 		IEvents::Destroy();
 		IWriter::Destroy();
+
+		for (t_size i = 0; i < IConfig::Count(); i++) {
+			instance_item item = IConfig::Get(i);
+			if (item.on_exit) {
+				CWriter::Write(&write_job(item.filename, item.on_exit_str));
+			}
+		}
 	}
 private:
 };

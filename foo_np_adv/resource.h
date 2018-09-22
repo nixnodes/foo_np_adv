@@ -22,6 +22,9 @@
 #define IDC_DELAY                       1018
 #define IDC_SPIN2                       1019
 #define IDC_SPIN1                       1019
+#define IDC_EDIT2                       1020
+#define IDC_ON_EXIT                     1020
+#define IDC_CHECK4                      1021
 
 // Next default values for new objects
 // 
@@ -29,7 +32,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        106
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1020
+#define _APS_NEXT_CONTROL_VALUE         1022
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

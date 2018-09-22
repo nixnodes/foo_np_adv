@@ -20,6 +20,8 @@ static std::map<int, std::vector<pfc::string8>> _evtostr = {
 	{EVENT_VOLCHANGE, {"Volume change",""}},
 };
 
+#define TR_RETURN(x) p_found_flag = x; return x;
+
 class titleformat_hook_test : public titleformat_hook {
 public:
 	titleformat_hook_test(metadb_handle_ptr p_track) : track(p_track) {}
@@ -28,13 +30,13 @@ public:
 		if ( pfc::stricmp_ascii_ex(p_name, p_name_length, "isplaying", ~t_size(0)) == 0) {
 			if (m_playback_control->is_playing()) {
 				p_out->write(titleformat_inputtypes::unknown, "1");
-				p_found_flag = true; return true;
+				TR_RETURN(true)
 			}
 		}
 		else if (pfc::stricmp_ascii_ex(p_name, p_name_length, "ispaused", ~t_size(0)) == 0) {
 			if (m_playback_control->is_paused()) {
 				p_out->write(titleformat_inputtypes::unknown, "1");
-				p_found_flag = true; return true;
+				TR_RETURN(true)
 			}
 		}
 		else if (pfc::stricmp_ascii_ex(p_name, p_name_length, "playback_time", ~t_size(0)) == 0) {
@@ -51,21 +53,21 @@ public:
 			s << seconds;
 
 			p_out->write(titleformat_inputtypes::unknown, s);
-			p_found_flag = true; return true;
+			TR_RETURN(true)
 		}				
 		else if (pfc::stricmp_ascii_ex(p_name, p_name_length, "title", ~t_size(0)) == 0 ||
 			pfc::stricmp_ascii_ex(p_name, p_name_length, "artist", ~t_size(0)) == 0 ||
 			pfc::stricmp_ascii_ex(p_name, p_name_length, "album", ~t_size(0)) == 0) {
 			if (!m_playback_control->is_playing()) {
 				p_out->write(titleformat_inputtypes::unknown, "");
-				p_found_flag = true; return true;
+				TR_RETURN(true)
 			}
 		}
 		else if (pfc::stricmp_ascii_ex(p_name, p_name_length, "volume", ~t_size(0)) == 0) {
 			pfc::string8 s;
 			s << m_playback_control->get_volume();
 			p_out->write(titleformat_inputtypes::unknown, s );
-			p_found_flag = true; return true;
+			TR_RETURN(true)
 		}
 		/*
 		else if (pfc::stricmp_ascii_ex(p_name, p_name_length, "test", ~0) == 0) {
@@ -78,12 +80,11 @@ public:
 			}
 		}
 		*/
-
-		p_found_flag = false; return false;		
+		TR_RETURN(false)
 	}
 
 	bool process_function(titleformat_text_out * p_out, const char * p_name, t_size p_name_length, titleformat_hook_function_params * p_params, bool & p_found_flag) { 
-		p_found_flag = false; return false;
+		TR_RETURN(false)
 	}
 
 private:
@@ -109,10 +110,7 @@ public:
 		pfc::string8 state;
 	
 		if (last_track.is_empty()) {
-			metadb_handle_ptr t;
-			if (m_playback_control->get_now_playing(t)) {
-				last_track = t;
-			}
+			m_playback_control->get_now_playing(last_track);
 		}
 
 		if (!last_track.is_empty()) {
@@ -121,12 +119,11 @@ public:
 		else {
 			m_playback_control->playback_format_title(NULL, state, m_script, NULL, playback_control::display_level_all);
 		}
-
 		return state;
 	}
 
 	static_api_ptr_t<playback_control> m_playback_control;
-	metadb_handle_ptr last_track{ 0 };
+	metadb_handle_ptr last_track;
 private:
 	virtual void on_playback_starting(play_control::t_track_command p_command, bool p_paused) {
 		event_update(EVENT_PLAYBACK_STARTING);
@@ -134,7 +131,6 @@ private:
 	virtual void on_playback_new_track(metadb_handle_ptr p_track) {
 		last_track = p_track;
 		event_update(EVENT_PLAYBACK_NEW_TRACK);
-		
 	}
 	virtual void on_playback_stop(play_control::t_stop_reason p_reason) {
 		if (p_reason != play_control::stop_reason_starting_another) {

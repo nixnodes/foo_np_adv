@@ -39,10 +39,10 @@ public:
 
 	void QueueWrite(const write_job *j) { q.push(*j); }
 	void QueueWriteAsync(const write_job *j, long long timeout);
+	static void Write(write_job *j);
 
 private:
-	void worker();
-	void Write(write_job *j);
+	void worker();	
 
 	std::thread *t;
 	Queue<write_job> q;
@@ -70,8 +70,8 @@ public:
 		m_Writer->QueueWrite(j);
 	}
 
-	static void WriteAsync(const write_job *j, long long timeout = 0) {
-		m_Writer->QueueWriteAsync(j, timeout);
+	static void WriteAsync(const write_job *j, long long delay = 0) {
+		m_Writer->QueueWriteAsync(j, delay);
 	}
 private:
 	static CWriter *m_Writer;

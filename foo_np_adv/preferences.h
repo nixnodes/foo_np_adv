@@ -32,12 +32,14 @@ public:
 		COMMAND_HANDLER_EX(IDC_COMBO1, CBN_SELCHANGE, OnComboSelChange)
 		COMMAND_HANDLER_EX(IDC_CHECK1, BN_CLICKED, OnChangeDefault)
 		COMMAND_HANDLER_EX(IDC_DELAY, EN_CHANGE, OnEditDelayChange)
-		COMMAND_HANDLER_EX(IDC_CHECK2, BN_CLICKED, OnCheckFileClicked)
-		COMMAND_HANDLER_EX(IDC_CHECK3, BN_CLICKED, OnCheckDelayClicked)
+		COMMAND_HANDLER_EX(IDC_CHECK2, BN_CLICKED, OnCheckBoxFileClicked)
+		COMMAND_HANDLER_EX(IDC_CHECK3, BN_CLICKED, OnCheckBoxDelayClicked)
 		COMMAND_HANDLER_EX(IDC_BUTTON1, BN_CLICKED, OnBnClickedAdd)
 		COMMAND_HANDLER_EX(IDC_BUTTON2, BN_CLICKED, OnBnClickedRemove)
 		COMMAND_HANDLER_EX(IDC_BUTTON3, BN_CLICKED, OnBnClickedFileChooser)
 		COMMAND_HANDLER_EX(IDC_PATTERN, EN_CHANGE, OnEditPatternChange)
+		COMMAND_HANDLER_EX(IDC_CHECK4, BN_CLICKED, OnCheckBoxOnExitClicked)
+		COMMAND_HANDLER_EX(IDC_ON_EXIT, EN_CHANGE, OnChangeDefault)
 		MSG_WM_CONTEXTMENU(OnContextMenu)
 	END_MSG_MAP()
 private:
@@ -47,8 +49,9 @@ private:
 	void OnComboTextChange(UINT, int, CWindow);
 	void OnBnClickedAdd(UINT, int, CWindow);
 	void OnBnClickedRemove(UINT, int, CWindow);
-	void OnCheckFileClicked(UINT, int, CWindow);
-	void OnCheckDelayClicked(UINT, int, CWindow);
+	void OnCheckBoxFileClicked(UINT, int, CWindow);
+	void OnCheckBoxDelayClicked(UINT, int, CWindow);
+	void OnCheckBoxOnExitClicked(UINT, int, CWindow);
 	void OnBnClickedFileChooser(UINT, int, CWindow);
 	void OnEditPatternChange(UINT, int, CWindow);
 	void OnEditDelayChange(UINT, int, CWindow);
@@ -59,6 +62,7 @@ private:
 	void PopulateContextList();
 	void SetControlAvailabilityFile();
 	void SetControlAvailabilityDelay();
+	void SetControlAvailabilityOnExit();
 	void ResetToUnselectedState();
 	void ResetToDefault();
 
@@ -80,9 +84,11 @@ private:
 	CCheckBox m_CheckBoxLogMode;
 	CCheckBox m_CheckBoxWriteToFile;
 	CCheckBox m_CheckBoxDelay;
+	CCheckBox m_CheckBoxOnExit;
 	CEdit m_EditFilename;
-	CEdit m_Pattern;
+	CEdit m_EditPattern;
 	CEdit m_EditDelay;
+	CEdit m_EditOnExit;
 	CButton m_ButtonAddInstance;
 	CButton m_ButtonRemoveInstance;
 	CButton m_ButtonEvent;

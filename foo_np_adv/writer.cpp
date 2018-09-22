@@ -47,17 +47,13 @@ void CWriter::Write(write_job *j) {
 	}
 }
 
-void CWriter::QueueWriteAsync(const write_job *j, long long timeout ) {
+void CWriter::QueueWriteAsync(const write_job *j, long long delay) {
 	std::thread([](const write_job j, CWriter *c, long long t) {
 		std::unique_lock<std::mutex> lk(CWriter::cvq_mutex);
-
-		if (CWriter::p_Destroy == 0) {
-			CWriter::cv_quit.wait_for(lk, std::chrono::milliseconds(t), 
-				[] {return CWriter::p_Destroy == 1; }
-			);
-		}
-
+		CWriter::cv_quit.wait_for(lk, std::chrono::milliseconds(t), 
+			[] {return CWriter::p_Destroy == 1; }
+		);		
 		c->q.push(j);
-	}, *j, this, timeout).detach();
+	}, *j, this, delay).detach();
 	
 }
