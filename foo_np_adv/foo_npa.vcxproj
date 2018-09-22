@@ -112,6 +112,7 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="datetime.cpp" />
     <ClCompile Include="initquit.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PCH.cpp">
@@ -123,6 +124,7 @@
     <ClCompile Include="writer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="datetime.h" />
     <ClInclude Include="events.h" />
     <ClInclude Include="prefs_instance.h" />
     <ClInclude Include="event_enums.h" />

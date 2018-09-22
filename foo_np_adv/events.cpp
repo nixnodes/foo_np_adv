@@ -58,4 +58,63 @@ void CEvents::event_update(uint32_t event) {
 			}
 		}
 	}
-};
+}
+
+bool titleformat_hook_glob::process_field(titleformat_text_out * p_out, const char * p_name, t_size p_name_length, bool & p_found_flag)
+{
+	if (pfc::stricmp_ascii_ex(p_name, p_name_length, "volume", pfc::infinite_size) == 0) {
+		pfc::string8 s;
+		s << m_playback_control->get_volume();
+		p_out->write(titleformat_inputtypes::unknown, s);
+		TR_RETURN(true)
+	}
+	else if (pfc::stricmp_ascii_ex(p_name, p_name_length, "datetime", pfc::infinite_size) == 0) {
+		p_out->write(titleformat_inputtypes::unknown, CDateTime().datetime());
+		TR_RETURN(true)
+	}
+	else if (pfc::stricmp_ascii_ex(p_name, p_name_length, "time", pfc::infinite_size) == 0) {
+		p_out->write(titleformat_inputtypes::unknown, CDateTime().time());
+		TR_RETURN(true)
+	}
+	else {
+		TR_RETURN(false)
+	}
+}
+
+bool titleformat_hook_glob::process_function(titleformat_text_out * p_out, const char * p_name, t_size p_name_length, titleformat_hook_function_params * p_params, bool & p_found_flag)
+{
+	if (pfc::strcmp_ex(p_name, p_name_length, "strftime", pfc::infinite_size) == 0) {
+		if (p_params->get_param_count() == 0) {
+			p_found_flag = false; return true;
+		}
+
+		const char *field_name = 0;
+		t_size field_name_length = 0;
+		p_params->get_param(0, field_name, field_name_length);
+
+		pfc::string8 fmt;
+		const char *p = field_name;
+
+		while (*p) {
+			if (*p == '%') {
+				p++;
+				if (*p == '\0') {
+					break;
+				}
+				if (CDateTime::is_fs_allowed(*p)) {
+					fmt << "%" << std::string(1, *p).c_str();
+				}
+			}
+			else {
+				fmt << std::string(1, *p).c_str();
+			}
+			p++;
+		}
+
+		p_out->write(titleformat_inputtypes::unknown, CDateTime().fmt(fmt));
+		TR_RETURN(true)
+	}
+	else {
+		TR_RETURN(false)
+	}
+}

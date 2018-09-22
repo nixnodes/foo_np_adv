@@ -6,8 +6,10 @@
 
 #include <map>
 #include <vector>
+#include <string>
+#include <sstream>
 
-#include <time.h> 
+#include "datetime.h"
 
 static std::map<int, std::vector<pfc::string8>> _evtostr = {
 	{EVENT_PLAYBACK_STARTING, {"Playback start","Trigger when playback starts"}},
@@ -26,30 +28,8 @@ static std::map<int, std::vector<pfc::string8>> _evtostr = {
 
 class titleformat_hook_glob : public titleformat_hook {
 public:
-	bool process_field(titleformat_text_out * p_out, const char * p_name, t_size p_name_length, bool & p_found_flag) {
-		if (pfc::stricmp_ascii_ex(p_name, p_name_length, "volume", ~t_size(0)) == 0) {
-			pfc::string8 s;
-			s << m_playback_control->get_volume();
-			p_out->write(titleformat_inputtypes::unknown, s);
-			TR_RETURN(true)
-		}
-		else if (pfc::stricmp_ascii_ex(p_name, p_name_length, "datetime", ~t_size(0)) == 0) {
-			time_t rawtime;
-			struct tm timeinfo;
-			char buffer[80];
-
-			time(&rawtime);
-			localtime_s(&timeinfo, &rawtime);
-
-			strftime(buffer, sizeof(buffer), "%c", &timeinfo);
-			p_out->write(titleformat_inputtypes::unknown, buffer);
-			TR_RETURN(true)
-		}
-		TR_RETURN(false)
-	}
-	bool process_function(titleformat_text_out * p_out, const char * p_name, t_size p_name_length, titleformat_hook_function_params * p_params, bool & p_found_flag) {
-		TR_RETURN(false)
-	}
+	bool process_field(titleformat_text_out * p_out, const char * p_name, t_size p_name_length, bool & p_found_flag);
+	bool process_function(titleformat_text_out * p_out, const char * p_name, t_size p_name_length, titleformat_hook_function_params * p_params, bool & p_found_flag);
 
 private:
 	static_api_ptr_t<playback_control> m_playback_control;
@@ -91,33 +71,42 @@ private:
 	virtual void on_playback_starting(play_control::t_track_command p_command, bool p_paused) {
 		event_update(EVENT_PLAYBACK_STARTING);
 	};
-	virtual void on_playback_new_track(metadb_handle_ptr p_track) {
+	virtual void on_playback_new_track(metadb_handle_ptr p_track)
+	{
 		event_update(EVENT_PLAYBACK_NEW_TRACK);
 	}
-	virtual void on_playback_stop(play_control::t_stop_reason p_reason) {
+	virtual void on_playback_stop(play_control::t_stop_reason p_reason)
+	{
 		if (p_reason != play_control::stop_reason_starting_another) {
 			event_update(EVENT_PLAYBACK_STOP);
 		}
 	}
-	virtual void on_playback_pause(bool p_state) {
+	virtual void on_playback_pause(bool p_state)
+	{
 		event_update(EVENT_PLAYBACK_PAUSE);
 	}
-	virtual void on_playback_seek(double p_time) {
+	virtual void on_playback_seek(double p_time)
+	{
 		event_update(EVENT_PLAYBACK_SEEK);
 	}
-	virtual void on_playback_edited(metadb_handle_ptr p_track) {
+	virtual void on_playback_edited(metadb_handle_ptr p_track)
+	{
 		event_update(EVENT_PLAYBACK_EDITED);
 	}
-	virtual void on_playback_dynamic_info(const file_info & p_info) {
+	virtual void on_playback_dynamic_info(const file_info & p_info)
+	{
 		event_update(EVENT_PLAYBACK_DINFO);
 	}
-	virtual void on_playback_dynamic_info_track(const file_info & p_info) {
+	virtual void on_playback_dynamic_info_track(const file_info & p_info)
+	{
 		event_update(EVENT_PLAYBACK_DINFO_TRACK);
 	}
-	virtual void on_playback_time(double p_time) {
+	virtual void on_playback_time(double p_time)
+	{
 		event_update(EVENT_PLAYBACK_TIME);
 	}
-	virtual void on_volume_change(float p_new_val) {
+	virtual void on_volume_change(float p_new_val)
+	{
 		event_update(EVENT_VOLCHANGE);
 	}
 
