@@ -3,15 +3,14 @@
 
 #include <thread>
 #include <string>
-#include <locale>
 #include <codecvt>
+#include <fstream>
 
 using namespace std;
-using namespace chrono;
 
-condition_variable CWriter::cv_quit;
-mutex CWriter::cvq_mutex;
-atomic<int> CWriter::p_Destroy{ 0 };
+condition_variable IWriter::cv_quit;
+mutex IWriter::cvq_mutex;
+atomic<int> IWriter::p_Destroy{ 0 };
 
 CWriter *IWriter::m_Writer = nullptr;
 
@@ -34,7 +33,6 @@ locale CWriter::lmap[ENCODING_COUNT] = {
 
 void CWriter::worker()
 {
-	console::info("NPA: writer thread starting");
 	while (true)
 	{
 		write_job j = q.pop();
@@ -43,7 +41,6 @@ void CWriter::worker()
 		}
 		Write(&j);
 	}
-	console::info("NPA: writer thread exiting");
 }
 
 wstring widen(pfc::string8 utf8) {
@@ -86,15 +83,4 @@ void CWriter::Write(write_job *j) {
 	catch (exception const & e) {
 		console::complain("NPA: write failed", e);
 	}
-}
-
-void CWriter::QueueWriteAsync(const write_job *j, long long delay) {
-	thread([](const write_job j, CWriter *c, long long t) {
-		unique_lock<mutex> lk(CWriter::cvq_mutex);
-		CWriter::cv_quit.wait_for(lk, chrono::milliseconds(t),
-			[] {return CWriter::p_Destroy == 1; }
-		);
-		c->q.push(j);
-	}, *j, this, delay).detach();
-
 }
