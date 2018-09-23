@@ -29,7 +29,8 @@ public:
 		COMMAND_HANDLER_EX(IDC_BOGO2, EN_CHANGE, OnChangeDefault)
 		COMMAND_HANDLER_EX(IDC_FILENAME, EN_CHANGE, OnChangeDefault)
 		COMMAND_HANDLER_EX(IDC_COMBO1, CBN_EDITCHANGE, OnComboTextChange)
-		COMMAND_HANDLER_EX(IDC_COMBO1, CBN_SELCHANGE, OnComboSelChange)
+		COMMAND_HANDLER_EX(IDC_COMBO1, CBN_SELCHANGE, OnComboInstanceSelChange)
+		COMMAND_HANDLER_EX(IDC_ENCODING, CBN_SELCHANGE, OnChangeDefault)
 		COMMAND_HANDLER_EX(IDC_CHECK1, BN_CLICKED, OnChangeDefault)
 		COMMAND_HANDLER_EX(IDC_DELAY, EN_CHANGE, OnEditDelayChange)
 		COMMAND_HANDLER_EX(IDC_CHECK2, BN_CLICKED, OnCheckBoxFileClicked)
@@ -45,7 +46,7 @@ public:
 private:
 	BOOL OnInitDialog(CWindow, LPARAM);
 	void OnChangeDefault(UINT, int, CWindow);
-	void OnComboSelChange(UINT, int, CWindow);
+	void OnComboInstanceSelChange(UINT, int, CWindow);
 	void OnComboTextChange(UINT, int, CWindow);
 	void OnBnClickedAdd(UINT, int, CWindow);
 	void OnBnClickedRemove(UINT, int, CWindow);
@@ -81,6 +82,8 @@ private:
 	}
 
 	CComboBox m_ComboBoxInstance;
+	CComboBox m_ComboBoxEncoding;
+	
 	CCheckBox m_CheckBoxLogMode;
 	CCheckBox m_CheckBoxWriteToFile;
 	CCheckBox m_CheckBoxDelay;
@@ -93,7 +96,8 @@ private:
 	CButton m_ButtonRemoveInstance;
 	CButton m_ButtonEvent;
 	CButton m_ButtonFileChooser;
-	CWindow m_DelaySpin;
+	CWindow m_WinDelaySpin;
+	CStatic m_StaticEncoding;
 
 	const preferences_page_callback::ptr m_callback;
 	titleformat_object::ptr m_script;

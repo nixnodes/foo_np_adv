@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "preferences.h"
 #include "events.h"
+#include "writer_flags.h"
 
 static const GUID cfg_instance_list_guid =
 { 0xAAD2BD90,0xAECA,0x42AA,{0x8B, 0x9D, 0x5A, 0x4B, 0xD9, 0x64, 0xB2, 0x82} };
@@ -22,17 +23,26 @@ BOOL CNPAPreferences::OnInitDialog(CWindow, LPARAM)
 	m_ButtonEvent = GetDlgItem(IDC_CONTEXTMENU);
 	m_EditDelay = GetDlgItem(IDC_DELAY);
 	m_CheckBoxDelay = GetDlgItem(IDC_CHECK3);
-	m_DelaySpin = GetDlgItem(IDC_SPIN1);
+	m_WinDelaySpin = GetDlgItem(IDC_SPIN1);
 	m_CheckBoxOnExit = GetDlgItem(IDC_CHECK4);
 	m_EditOnExit = GetDlgItem(IDC_ON_EXIT);
+	m_ComboBoxEncoding = GetDlgItem(IDC_ENCODING);
+	m_StaticEncoding = GetDlgItem(IDC_STATIC5);
 
-	SendMessage(m_DelaySpin, UDM_SETBUDDY, (WPARAM)(HWND)m_EditDelay, 0);
-	SendMessage(m_DelaySpin, UDM_SETRANGE32, 0, CNPAPreferences::idc_delay_hardlimit);
+	SendMessage(m_WinDelaySpin, UDM_SETBUDDY, (WPARAM)(HWND)m_EditDelay, 0);
+	SendMessage(m_WinDelaySpin, UDM_SETRANGE32, 0, CNPAPreferences::idc_delay_hardlimit);
 
 	SetDlgItemInt(IDC_DELAY, 0, false);
 
-	PopulateContextList();
+	m_ComboBoxEncoding.AddString(_T("CP-1252"));
+	m_ComboBoxEncoding.AddString(_T("UTF-8"));
+	m_ComboBoxEncoding.AddString(_T("UTF-8 BOM"));
+	m_ComboBoxEncoding.AddString(_T("UCS-2 BE"));
+	m_ComboBoxEncoding.AddString(_T("UCS-2 LE"));
+	m_ComboBoxEncoding.AddString(_T("UCS-2 BE BOM"));
+	m_ComboBoxEncoding.AddString(_T("UCS-2 LE BOM"));
 
+	PopulateContextList();
 
 	return FALSE;
 }
@@ -48,7 +58,7 @@ void CNPAPreferences::PopulateContextList()
 
 	if (m_ComboBoxInstance.GetCount() > 0) {
 		m_ComboBoxInstance.SetCurSel(0);
-		OnComboSelChange(0, CBN_SELCHANGE, m_ComboBoxInstance);
+		OnComboInstanceSelChange(0, CBN_SELCHANGE, m_ComboBoxInstance);
 	}
 }
 
@@ -76,9 +86,11 @@ void CNPAPreferences::ResetToUnselectedState()
 	m_ButtonRemoveInstance.EnableWindow(false);
 	m_CheckBoxDelay.EnableWindow(false);
 	m_EditDelay.EnableWindow(false);
-	m_DelaySpin.EnableWindow(false);
+	m_WinDelaySpin.EnableWindow(false);
 	m_CheckBoxOnExit.EnableWindow(false);
 	m_EditOnExit.EnableWindow(false);
+	m_ComboBoxEncoding.EnableWindow(false);
+	m_StaticEncoding.EnableWindow(false);
 	ResetFlags();
 }
 
@@ -96,12 +108,14 @@ void CNPAPreferences::ResetToDefault()
 	m_ButtonFileChooser.EnableWindow(false);
 	m_CheckBoxDelay.EnableWindow(false);
 	m_EditDelay.EnableWindow(false);
-	m_DelaySpin.EnableWindow(false);
+	m_WinDelaySpin.EnableWindow(false);
 	m_EditOnExit.EnableWindow(false);
+	m_ComboBoxEncoding.EnableWindow(false);
+	m_StaticEncoding.EnableWindow(false);
 	ResetFlags();
 }
 
-void CNPAPreferences::OnComboSelChange(UINT, int, CWindow)
+void CNPAPreferences::OnComboInstanceSelChange(UINT, int, CWindow)
 {
 	int index = m_ComboBoxInstance.GetCurSel();
 
@@ -121,6 +135,7 @@ void CNPAPreferences::OnComboSelChange(UINT, int, CWindow)
 	m_CheckBoxDelay.SetCheck(item.enable_delay ? 1 : 0);
 	m_CheckBoxOnExit.SetCheck(item.on_exit ? 1 : 0);
 	SetDlgItemInt(IDC_DELAY, item.delay);
+	m_ComboBoxEncoding.SetCurSel(item.encoding);
 
 	for (int i = 0; i < EVENT_COUNT; i++) {
 		event_flags[i] = item.events[i];
@@ -171,7 +186,7 @@ void CNPAPreferences::OnComboTextChange(UINT, int, CWindow)
 			m_ButtonAddInstance.EnableWindow(false);
 			m_ButtonRemoveInstance.EnableWindow(true);
 			m_ComboBoxInstance.SetCurSel(i);
-			OnComboSelChange(0, CBN_SELCHANGE, m_ComboBoxInstance);
+			OnComboInstanceSelChange(0, CBN_SELCHANGE, m_ComboBoxInstance);
 			return;
 		}
 	}
@@ -195,11 +210,11 @@ void CNPAPreferences::OnBnClickedAdd(UINT, int, CWindow)
 		}
 	}
 
-	instance_item item((pfc::string8) pszCAS, "", "", false, false, false, 0, {}, false, "", 0);
+	instance_item item((pfc::string8) pszCAS, "", "", false, false, false, 0, {}, false, "", ENCODING_UTF8);
 	g_cfg_instance_list.add_item(item);
 	m_ComboBoxInstance.InsertString(m_ComboBoxInstance.GetCount(), str);
 	m_ComboBoxInstance.SetCurSel(m_ComboBoxInstance.GetCount() - 1);
-	OnComboSelChange(0, CBN_SELCHANGE, m_ComboBoxInstance);
+	OnComboInstanceSelChange(0, CBN_SELCHANGE, m_ComboBoxInstance);
 }
 
 void CNPAPreferences::OnBnClickedRemove(UINT, int, CWindow)
@@ -219,7 +234,7 @@ void CNPAPreferences::OnBnClickedRemove(UINT, int, CWindow)
 
 	if (m_ComboBoxInstance.GetCount() > 0) {
 		m_ComboBoxInstance.SetCurSel(max(m_ComboBoxInstance.GetCount() - 1, 0));
-		OnComboSelChange(0, CBN_SELCHANGE, m_ComboBoxInstance);
+		OnComboInstanceSelChange(0, CBN_SELCHANGE, m_ComboBoxInstance);
 	}
 	else {
 		ResetToUnselectedState();
@@ -233,12 +248,16 @@ void CNPAPreferences::SetControlAvailabilityFile()
 		m_CheckBoxLogMode.EnableWindow(true);
 		m_ButtonFileChooser.EnableWindow(true);
 		m_CheckBoxDelay.EnableWindow(true);
+		m_ComboBoxEncoding.EnableWindow(true);
+		m_StaticEncoding.EnableWindow(true);
 	}
 	else {
 		m_EditFilename.EnableWindow(false);
 		m_CheckBoxLogMode.EnableWindow(false);
 		m_ButtonFileChooser.EnableWindow(false);
 		m_CheckBoxDelay.EnableWindow(false);
+		m_ComboBoxEncoding.EnableWindow(false);
+		m_StaticEncoding.EnableWindow(false);
 	}
 	SetControlAvailabilityDelay();
 }
@@ -247,11 +266,11 @@ void CNPAPreferences::SetControlAvailabilityDelay()
 {
 	if (m_CheckBoxWriteToFile.IsChecked() &&
 		m_CheckBoxDelay.IsChecked()) {
-		m_DelaySpin.EnableWindow(true);
+		m_WinDelaySpin.EnableWindow(true);
 		m_EditDelay.EnableWindow(true);
 	}
 	else {
-		m_DelaySpin.EnableWindow(false);
+		m_WinDelaySpin.EnableWindow(false);
 		m_EditDelay.EnableWindow(false);
 	}
 }
@@ -396,6 +415,7 @@ void CNPAPreferences::apply()
 	uGetDlgItemText(*this, IDC_ON_EXIT, str);
 	item.on_exit_str = str;
 	item.write_to_file = m_CheckBoxWriteToFile.IsChecked();
+	item.encoding = min((uint8_t)m_ComboBoxEncoding.GetCurSel(), ENCODING_COUNT - 1);
 	item.log_mode = m_CheckBoxLogMode.IsChecked();
 	item.enable_delay = m_CheckBoxDelay.IsChecked();
 	item.on_exit = m_CheckBoxOnExit.IsChecked();
@@ -426,6 +446,10 @@ bool CNPAPreferences::HasChanged()
 	}
 
 	if (m_CheckBoxWriteToFile.IsChecked() != item.write_to_file) {
+		return true;
+	}
+
+	if (m_ComboBoxEncoding.GetCurSel() != item.encoding) {
 		return true;
 	}
 

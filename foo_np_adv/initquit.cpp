@@ -15,7 +15,7 @@ public:
 		for (t_size i = 0; i < IConfig::Count(); i++) {
 			instance_item item = IConfig::Get(i);
 			if (item.on_exit) {
-				CWriter::Write(&write_job(item.filename, item.on_exit_str));
+				CWriter::Write(&write_job(item.filename, item.on_exit_str, item.encoding));
 			}
 		}
 	}

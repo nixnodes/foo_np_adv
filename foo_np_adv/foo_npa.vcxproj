@@ -133,6 +133,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="writer.h" />
+    <ClInclude Include="writer_flags.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="foo_npa.rc" />

@@ -34,11 +34,12 @@ void CEvents::event_update(uint32_t event) {
 	for (const auto &p : m_instancemap[event]) {
 		titleformat_object::ptr m_script = p.second.m_script;
 		pfc::string8 state = format_title(m_script);
+		const instance_item &item = p.second.item;
 
-		if (p.second.item.write_to_file) {
+		if (item.write_to_file) {
 			uint32_t flags;
 
-			if (p.second.item.log_mode) {
+			if (item.log_mode) {
 				flags = F_WRITER_APPEND;
 				if (state.length() == 0) {
 					continue;
@@ -49,9 +50,9 @@ void CEvents::event_update(uint32_t event) {
 				flags = 0;
 			}
 
-			write_job j(p.second.item.filename, state, flags);
-			if (p.second.item.enable_delay) {
-				IWriter::WriteAsync(&j, p.second.item.delay);
+			write_job j(item.filename, state, item.encoding, flags);
+			if (item.enable_delay) {
+				IWriter::WriteAsync(&j, item.delay);
 			}
 			else {
 				IWriter::Write(&j);

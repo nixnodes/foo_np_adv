@@ -3,8 +3,10 @@
 #include "stdafx.h"
 #include "events.h"
 #include "queue.h"
+#include "writer_flags.h"
 
 #include <atomic>
+#include <fstream>
 
 #define F_WRITER_APPEND		(uint32_t) 0x00000001
 #define F_WRITER_ABORT		(uint32_t) 0x00000002
@@ -12,13 +14,12 @@
 typedef struct write_job_s {
 	pfc::string8 file;
 	pfc::string8 data;
-	uint32_t flags = 0;
+	uint8_t flags = 0;
+	uint8_t encoding = 0;
 
-	write_job_s(pfc::string8 p_file, pfc::string8 p_data, uint32_t p_flags) :
-		file(p_file), data(p_data), flags(p_flags) {}
-	write_job_s(pfc::string8 p_file, pfc::string8 p_data) :
-		file(p_file), data(p_data) {}
-	write_job_s(uint32_t p_flags) : flags(p_flags) {}
+	write_job_s(const pfc::string8 p_file, const pfc::string8 p_data, const uint8_t p_encoding, const uint8_t p_flags = 0) :
+		file(p_file), data(p_data), encoding(p_encoding), flags(p_flags) {}
+	write_job_s(const uint8_t p_flags) : flags(p_flags) {}
 	write_job_s() {}
 
 } write_job;
@@ -46,6 +47,8 @@ private:
 
 	std::thread *t;
 	Queue<write_job> q;
+
+	static std::locale lmap[ENCODING_COUNT];
 
 	static std::condition_variable cv_quit;
 	static std::mutex cvq_mutex;
