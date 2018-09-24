@@ -43,7 +43,12 @@ void CEvents::event_update(uint32_t event) {
 
 		const instance_item &item = ievent.item;
 
-		if (item.write_to_file) {
+		if (item.clipboard) {
+			ClipboardHelper::OpenScope hclip;
+			hclip.Open(NULL);
+			ClipboardHelper::SetString(state);
+		}
+		else if (item.write_to_file) {
 			instance_state &st = c_instst[item.name];
 			if (item.changes_only) {
 				if (st.last_state == state &&

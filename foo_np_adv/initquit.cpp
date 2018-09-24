@@ -1,5 +1,6 @@
 #include "stdafx.h"
 
+
 class npa_initquit : public initquit {
 public:
 	void on_init() {

@@ -41,6 +41,7 @@ public:
 		COMMAND_HANDLER_EX(IDC_CHECK4, BN_CLICKED, OnCheckBoxOnExitClicked)
 		COMMAND_HANDLER_EX(IDC_ON_EXIT, EN_CHANGE, OnChangeDefault)
 		COMMAND_HANDLER_EX(IDC_CHECK5, BN_CLICKED, OnChangeDefault)
+		COMMAND_HANDLER_EX(IDC_CHECK6, BN_CLICKED, OnCheckBoxClipboardClick)
 		MSG_WM_CONTEXTMENU(OnContextMenu)
 	END_MSG_MAP()
 private:
@@ -56,6 +57,7 @@ private:
 	void OnBnClickedFileChooser(UINT, int, CWindow);
 	void OnEditPatternChange(UINT, int, CWindow);
 	void OnEditDelayChange(UINT, int, CWindow);
+	void OnCheckBoxClipboardClick(UINT, int, CWindow);
 	void OnContextMenu(CWindow wnd, CPoint point);
 
 	void PatternPreviewUpdate(uint32_t event, bool force = false);
@@ -65,6 +67,7 @@ private:
 	void SetControlAvailabilityFile();
 	void SetControlAvailabilityDelay();
 	void SetControlAvailabilityOnExit();
+	void SetControlAvailabilityClipboard();
 	void ResetToUnselectedState();
 	void ResetToDefault();
 
@@ -88,7 +91,8 @@ private:
 	CCheckBox m_CheckBoxWriteToFile;
 	CCheckBox m_CheckBoxDelay;
 	CCheckBox m_CheckBoxOnExit;
-	CCheckBox m_ChangesOnly;
+	CCheckBox m_CheckBoxChangesOnly;
+	CCheckBox m_CheckBoxClipboard;
 	CEdit m_EditFilename;
 	CEdit m_EditPattern;
 	CEdit m_EditDelay;

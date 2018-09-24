@@ -25,7 +25,8 @@ BOOL CNPAPreferences::OnInitDialog(CWindow, LPARAM)
 	m_EditOnExit = GetDlgItem(IDC_ON_EXIT);
 	m_ComboBoxEncoding = GetDlgItem(IDC_ENCODING);
 	m_StaticEncoding = GetDlgItem(IDC_STATIC5);
-	m_ChangesOnly = GetDlgItem(IDC_CHECK5);
+	m_CheckBoxChangesOnly = GetDlgItem(IDC_CHECK5);
+	m_CheckBoxClipboard = GetDlgItem(IDC_CHECK6);
 
 	SendMessage(m_WinDelaySpin, UDM_SETBUDDY, (WPARAM)(HWND)m_EditDelay, 0);
 	SendMessage(m_WinDelaySpin, UDM_SETRANGE32, 0, CNPAPreferences::idc_delay_hardlimit);
@@ -47,9 +48,8 @@ BOOL CNPAPreferences::OnInitDialog(CWindow, LPARAM)
 
 void CNPAPreferences::PopulateContextList()
 {
-	uint32_t i;
-	for (i = 0; i < g_cfg_instance_list.get_count(); i++) {
-		instance_item item = g_cfg_instance_list.get_item(i);
+	for (t_size i = 0; i < g_cfg_instance_list.get_count(); i++) {
+		instance_item &item = g_cfg_instance_list.get_item(i);
 		CA2T w_name(item.name.c_str());
 		m_ComboBoxInstance.AddString(w_name);
 	}
@@ -89,7 +89,8 @@ void CNPAPreferences::ResetToUnselectedState()
 	m_EditOnExit.EnableWindow(false);
 	m_ComboBoxEncoding.EnableWindow(false);
 	m_StaticEncoding.EnableWindow(false);
-	m_ChangesOnly.EnableWindow(false);
+	m_CheckBoxChangesOnly.EnableWindow(false);
+	m_CheckBoxClipboard.EnableWindow(false);
 	ResetFlags();
 }
 
@@ -111,8 +112,19 @@ void CNPAPreferences::ResetToDefault()
 	m_EditOnExit.EnableWindow(false);
 	m_ComboBoxEncoding.EnableWindow(false);
 	m_StaticEncoding.EnableWindow(false);
-	m_ChangesOnly.EnableWindow(false);
+	m_CheckBoxChangesOnly.EnableWindow(false);
 	ResetFlags();
+}
+
+bool get_item_using_clipboard(instance_item &out) {
+	for (t_size i = 0; i < g_cfg_instance_list.get_count(); i++) {
+		instance_item &item = g_cfg_instance_list.get_item(i);
+		if (item.clipboard) {
+			out = item;
+			return true;
+		}
+	}
+	return false;
 }
 
 void CNPAPreferences::OnComboInstanceSelChange(UINT, int, CWindow)
@@ -134,31 +146,36 @@ void CNPAPreferences::OnComboInstanceSelChange(UINT, int, CWindow)
 	m_CheckBoxLogMode.SetCheck(item.log_mode ? 1 : 0);
 	m_CheckBoxDelay.SetCheck(item.enable_delay ? 1 : 0);
 	m_CheckBoxOnExit.SetCheck(item.on_exit ? 1 : 0);
-	m_ChangesOnly.SetCheck(item.changes_only ? 1 : 0);
+	m_CheckBoxChangesOnly.SetCheck(item.changes_only ? 1 : 0);
+	m_CheckBoxClipboard.SetCheck(item.clipboard ? 1 : 0);
 	SetDlgItemInt(IDC_DELAY, item.delay);
 	m_ComboBoxEncoding.SetCurSel(item.encoding);
+
 
 	for (int i = 0; i < EVENT_COUNT; i++) {
 		event_flags[i] = item.events[i];
 	}
 
-	if (!m_EditPattern.IsWindowEnabled()) {
-		m_EditPattern.EnableWindow(true);
+	m_EditPattern.EnableWindow(true);
+	m_ButtonEvent.EnableWindow(true);
+	m_CheckBoxWriteToFile.EnableWindow(true);
+	m_ButtonFileChooser.EnableWindow(true);
+	m_CheckBoxOnExit.EnableWindow(true);
+
+	instance_item cpitem;
+	if (get_item_using_clipboard(cpitem)) {
+		if (cpitem == item) {
+			m_CheckBoxClipboard.EnableWindow(true);
+		}
+		else {
+			m_CheckBoxClipboard.EnableWindow(false);
+		}
 	}
-	if (!m_ButtonEvent.IsWindowEnabled()) {
-		m_ButtonEvent.EnableWindow(true);
-	}
-	if (!m_CheckBoxWriteToFile.IsWindowEnabled()) {
-		m_CheckBoxWriteToFile.EnableWindow(true);
-	}
-	if (!m_ButtonFileChooser.IsWindowEnabled()) {
-		m_ButtonFileChooser.EnableWindow(true);
-	}
-	if (!m_CheckBoxOnExit.IsWindowEnabled()) {
-		m_CheckBoxOnExit.EnableWindow(true);
+	else {
+		m_CheckBoxClipboard.EnableWindow(true);
 	}
 
-	SetControlAvailabilityFile();
+	SetControlAvailabilityClipboard();
 	SetControlAvailabilityOnExit();
 
 	m_ButtonAddInstance.EnableWindow(false);
@@ -211,8 +228,8 @@ void CNPAPreferences::OnBnClickedAdd(UINT, int, CWindow)
 		}
 	}
 
-	instance_item item(pfc::string8(CT2CA(str)), "", "", false, 
-		false, false, 0, {}, false, "", ENCODING_UTF8, false);
+	instance_item item(pfc::string8(CT2CA(str)), "", "", false,
+		false, false, 0, {}, false, "", ENCODING_UTF8, false, false);
 	g_cfg_instance_list.add_item(item);
 	m_ComboBoxInstance.InsertString(m_ComboBoxInstance.GetCount(), str);
 	m_ComboBoxInstance.SetCurSel(m_ComboBoxInstance.GetCount() - 1);
@@ -245,14 +262,15 @@ void CNPAPreferences::OnBnClickedRemove(UINT, int, CWindow)
 
 void CNPAPreferences::SetControlAvailabilityFile()
 {
-	if (m_CheckBoxWriteToFile.IsChecked()) {
+	if (m_CheckBoxWriteToFile.IsChecked() &&
+		m_CheckBoxWriteToFile.IsWindowEnabled()) {
 		m_EditFilename.EnableWindow(true);
 		m_CheckBoxLogMode.EnableWindow(true);
 		m_ButtonFileChooser.EnableWindow(true);
 		m_CheckBoxDelay.EnableWindow(true);
 		m_ComboBoxEncoding.EnableWindow(true);
 		m_StaticEncoding.EnableWindow(true);
-		m_ChangesOnly.EnableWindow(true);
+		m_CheckBoxChangesOnly.EnableWindow(true);
 	}
 	else {
 		m_EditFilename.EnableWindow(false);
@@ -261,7 +279,7 @@ void CNPAPreferences::SetControlAvailabilityFile()
 		m_CheckBoxDelay.EnableWindow(false);
 		m_ComboBoxEncoding.EnableWindow(false);
 		m_StaticEncoding.EnableWindow(false);
-		m_ChangesOnly.EnableWindow(false);
+		m_CheckBoxChangesOnly.EnableWindow(false);
 	}
 	SetControlAvailabilityDelay();
 }
@@ -288,6 +306,16 @@ void CNPAPreferences::SetControlAvailabilityOnExit() {
 	}
 }
 
+void CNPAPreferences::SetControlAvailabilityClipboard() {
+	if (!m_CheckBoxClipboard.IsChecked()) {
+		m_CheckBoxWriteToFile.EnableWindow(true);
+	}
+	else {
+		m_CheckBoxWriteToFile.EnableWindow(false);
+	}
+	SetControlAvailabilityFile();
+}
+
 void CNPAPreferences::OnCheckBoxFileClicked(UINT, int, CWindow)
 {
 	SetControlAvailabilityFile();
@@ -302,6 +330,11 @@ void CNPAPreferences::OnCheckBoxDelayClicked(UINT, int, CWindow)
 
 void CNPAPreferences::OnCheckBoxOnExitClicked(UINT, int, CWindow) {
 	SetControlAvailabilityOnExit();
+	OnChanged();
+}
+
+void CNPAPreferences::OnCheckBoxClipboardClick(UINT, int, CWindow) {
+	SetControlAvailabilityClipboard();
 	OnChanged();
 }
 
@@ -433,7 +466,8 @@ void CNPAPreferences::apply()
 	item.log_mode = m_CheckBoxLogMode.IsChecked();
 	item.enable_delay = m_CheckBoxDelay.IsChecked();
 	item.on_exit = m_CheckBoxOnExit.IsChecked();
-	item.changes_only = m_ChangesOnly.IsChecked();
+	item.changes_only = m_CheckBoxChangesOnly.IsChecked();
+	item.clipboard = m_CheckBoxClipboard.IsChecked();
 	item.delay = (uint32_t)GetDlgItemInt(IDC_DELAY, false);
 
 	for (int i = 0; i < EVENT_COUNT; i++) {
@@ -476,7 +510,11 @@ bool CNPAPreferences::HasChanged()
 		return true;
 	}
 
-	if (m_ChangesOnly.IsChecked() != item.changes_only) {
+	if (m_CheckBoxClipboard.IsChecked() != item.clipboard) {
+		return true;
+	}
+
+	if (m_CheckBoxChangesOnly.IsChecked() != item.changes_only) {
 		return true;
 	}
 
