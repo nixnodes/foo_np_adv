@@ -1,7 +1,4 @@
 #include "stdafx.h"
-#include "events.h"
-#include "writer.h"
-#include "preferences.h"
 
 class npa_initquit : public initquit {
 public:

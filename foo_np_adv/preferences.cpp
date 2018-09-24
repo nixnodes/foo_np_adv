@@ -1,7 +1,4 @@
 #include "stdafx.h"
-#include "preferences.h"
-#include "events.h"
-#include "writer_flags.h"
 
 static const GUID cfg_instance_list_guid =
 { 0xAAD2BD90,0xAECA,0x42AA,{0x8B, 0x9D, 0x5A, 0x4B, 0xD9, 0x64, 0xB2, 0x82} };

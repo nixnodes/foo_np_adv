@@ -1,10 +1,4 @@
 #include "stdafx.h"
-#include "writer.h"
-
-#include <thread>
-#include <string>
-#include <codecvt>
-#include <fstream>
 
 using namespace std;
 

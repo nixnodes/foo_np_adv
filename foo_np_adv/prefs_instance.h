@@ -1,6 +1,5 @@
 #pragma once
 
-#include "stdafx.h"
 #include "event_enums.h"
 
 typedef struct instance_item_s {

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "resource.h"
-#include "stdafx.h"
 #include "events.h"
 #include "prefs_instance.h"
 

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "stdafx.h"
 #include "prefs_instance.h"
 #include "event_enums.h"
 #include "datetime.h"
@@ -8,7 +7,6 @@
 #include <map>
 #include <vector>
 #include <string>
-#include <sstream>
 
 static std::map<int, std::vector<pfc::string8>> _evtostr = {
 	{EVENT_PLAYBACK_STARTING, {"Playback start","Trigger when playback starts"}},
@@ -26,6 +24,7 @@ static std::map<int, std::vector<pfc::string8>> _evtostr = {
 #define MSG_EVENT_UNKNOWN	"EVENT_UNKNOWN"
 
 #define TR_RETURN(x) p_found_flag = x; return x;
+#define TR_RETURN2(x,y) p_found_flag = x; return y;
 
 class titleformat_hook_glob : public titleformat_hook {
 public:
@@ -34,7 +33,6 @@ public:
 
 private:
 	static_api_ptr_t<playback_control> m_playback_control;
-	metadb_handle_ptr track;
 };
 
 typedef struct event_item_s {

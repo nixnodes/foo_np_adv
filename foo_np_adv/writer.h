@@ -1,12 +1,15 @@
 #pragma once
 
-#include "stdafx.h"
 #include "events.h"
 #include "queue.h"
 #include "writer_flags.h"
 
 #include <atomic>
 #include <locale>
+#include <thread>
+#include <string>
+#include <codecvt>
+#include <fstream>
 
 #define F_WRITER_APPEND		(uint32_t) 0x00000001
 #define F_WRITER_ABORT		(uint32_t) 0x00000002

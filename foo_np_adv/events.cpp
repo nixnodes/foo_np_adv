@@ -1,6 +1,4 @@
 #include "stdafx.h"
-#include "events.h"
-#include "writer.h"
 
 CEvents *IEvents::m_Events = nullptr;
 static std::map<pfc::string8, instance_state> c_instst;
@@ -18,7 +16,7 @@ event_item CEvents::UpdateInstance(instance_item *item)
 	}
 
 	c_instst[item->name] = instance_state();
-	
+
 	return evitem;
 }
 
@@ -47,8 +45,8 @@ void CEvents::event_update(uint32_t event) {
 
 		if (item.write_to_file) {
 			instance_state &st = c_instst[item.name];
-			if (item.changes_only) {				
-				if (st.last_state == state && 
+			if (item.changes_only) {
+				if (st.last_state == state &&
 					st.ponce != false) {
 					continue;
 				}
@@ -105,7 +103,7 @@ bool titleformat_hook_glob::process_function(titleformat_text_out * p_out, const
 {
 	if (pfc::strcmp_ex(p_name, p_name_length, "strftime", pfc::infinite_size) == 0) {
 		if (p_params->get_param_count() == 0) {
-			p_found_flag = false; return true;
+			TR_RETURN2(false, true)
 		}
 
 		const char *field_name = 0;
@@ -113,7 +111,6 @@ bool titleformat_hook_glob::process_function(titleformat_text_out * p_out, const
 		p_params->get_param(0, field_name, field_name_length);
 
 		pfc::string8 fmt;
-		const char *p = field_name;
 
 		// sanitize format string to avoid segfaults in C strftime
 		for (t_size i = 0; i < field_name_length; i++) {
