@@ -16,6 +16,7 @@ BOOL CNPAPreferences::OnInitDialog(CWindow, LPARAM)
 	m_EditPattern = GetDlgItem(IDC_PATTERN);
 	m_ButtonAddInstance = GetDlgItem(IDC_BUTTON1);
 	m_ButtonRemoveInstance = GetDlgItem(IDC_BUTTON2);
+	m_ButtonRenameInstance = GetDlgItem(IDC_BUTTON4);
 	m_ButtonFileChooser = GetDlgItem(IDC_BUTTON3);
 	m_ButtonEvent = GetDlgItem(IDC_CONTEXTMENU);
 	m_EditDelay = GetDlgItem(IDC_DELAY);
@@ -81,6 +82,7 @@ void CNPAPreferences::ResetToUnselectedState()
 	m_CheckBoxLogMode.EnableWindow(false);
 	m_ButtonFileChooser.EnableWindow(false);
 	m_ButtonAddInstance.EnableWindow(false);
+	m_ButtonRenameInstance.EnableWindow(false);
 	m_ButtonRemoveInstance.EnableWindow(false);
 	m_CheckBoxDelay.EnableWindow(false);
 	m_EditDelay.EnableWindow(false);
@@ -129,15 +131,15 @@ bool get_item_using_clipboard(instance_item &out) {
 
 void CNPAPreferences::OnComboInstanceSelChange(UINT, int, CWindow)
 {
-	int index = m_ComboBoxInstance.GetCurSel();
+	int curIndex = m_ComboBoxInstance.GetCurSel();
 
-	if (index < 0) {
+	if (curIndex < 0) {
 		return;
 	}
 
 	m_script.release();
 
-	instance_item item = g_cfg_instance_list.get_item(index);
+	instance_item item = g_cfg_instance_list.get_item(curIndex);
 
 	uSetDlgItemText(*this, IDC_FILENAME, item.filename);
 	uSetDlgItemText(*this, IDC_PATTERN, item.format_string);
@@ -151,10 +153,11 @@ void CNPAPreferences::OnComboInstanceSelChange(UINT, int, CWindow)
 	SetDlgItemInt(IDC_DELAY, item.delay);
 	m_ComboBoxEncoding.SetCurSel(item.encoding);
 
-
 	for (int i = 0; i < EVENT_COUNT; i++) {
 		event_flags[i] = item.events[i];
 	}
+
+	m_curIndex = curIndex;
 
 	m_EditPattern.EnableWindow(true);
 	m_ButtonEvent.EnableWindow(true);
@@ -180,6 +183,7 @@ void CNPAPreferences::OnComboInstanceSelChange(UINT, int, CWindow)
 
 	m_ButtonAddInstance.EnableWindow(false);
 	m_ButtonRemoveInstance.EnableWindow(true);
+	m_ButtonRenameInstance.EnableWindow(false);
 
 	OnChanged();
 }
@@ -193,6 +197,7 @@ void CNPAPreferences::OnComboTextChange(UINT, int, CWindow)
 	if (str.GetLength() == 0) {
 		m_ButtonAddInstance.EnableWindow(false);
 		m_ButtonRemoveInstance.EnableWindow(false);
+		m_ButtonRenameInstance.EnableWindow(false);
 		return;
 	}
 
@@ -203,6 +208,7 @@ void CNPAPreferences::OnComboTextChange(UINT, int, CWindow)
 		if (str == str2.MakeLower()) {
 			m_ButtonAddInstance.EnableWindow(false);
 			m_ButtonRemoveInstance.EnableWindow(true);
+			m_ButtonRenameInstance.EnableWindow(false);
 			m_ComboBoxInstance.SetCurSel(i);
 			OnComboInstanceSelChange(0, CBN_SELCHANGE, m_ComboBoxInstance);
 			return;
@@ -211,6 +217,7 @@ void CNPAPreferences::OnComboTextChange(UINT, int, CWindow)
 
 	m_ButtonAddInstance.EnableWindow(true);
 	m_ButtonRemoveInstance.EnableWindow(false);
+	m_ButtonRenameInstance.EnableWindow(true);
 }
 
 void CNPAPreferences::OnBnClickedAdd(UINT, int, CWindow)
@@ -219,13 +226,8 @@ void CNPAPreferences::OnBnClickedAdd(UINT, int, CWindow)
 	GetDlgItemText(IDC_COMBO1, str);
 	str = str.MakeLower();
 
-	for (int i = 0; i < m_ComboBoxInstance.GetCount(); i++) {
-		CString str2;
-		m_ComboBoxInstance.GetLBText(i, str2);
-
-		if (str == str2.MakeLower()) {
-			return;
-		}
+	if (HasComboString(str)) {
+		return;
 	}
 
 	instance_item item(pfc::string8(CT2CA(str)), "", "", false,
@@ -244,7 +246,7 @@ void CNPAPreferences::OnBnClickedRemove(UINT, int, CWindow)
 		return;
 	}
 
-	instance_item item = g_cfg_instance_list.get_item(curIndex);
+	instance_item &item = g_cfg_instance_list.get_item(curIndex);
 
 	g_cfg_instance_list.remove_by_idx(curIndex);
 	m_ComboBoxInstance.DeleteString(curIndex);
@@ -258,6 +260,44 @@ void CNPAPreferences::OnBnClickedRemove(UINT, int, CWindow)
 	else {
 		ResetToUnselectedState();
 	}
+}
+
+void CNPAPreferences::OnBnClickedRename(UINT, int, CWindow)
+{
+	CString str;
+	GetDlgItemText(IDC_COMBO1, str);
+	str = str.MakeLower();
+
+	if (HasComboString(str)) {
+		return;
+	}
+
+	if (m_curIndex < 0) {
+		return;
+	}
+
+	instance_item &item = g_cfg_instance_list.get_item(m_curIndex);
+	item.name = pfc::string8(CT2CA(str));
+	g_cfg_instance_list.replace_item(m_curIndex, item);
+
+	IEvents::UpdateInstance(&item);
+
+	m_ComboBoxInstance.DeleteString(m_curIndex);
+	m_ComboBoxInstance.InsertString(m_curIndex, str);
+	OnComboTextChange(0, IDC_COMBO1, m_ComboBoxInstance);
+
+}
+
+bool CNPAPreferences::HasComboString(CString &ls) {
+	for (int i = 0; i < m_ComboBoxInstance.GetCount(); i++) {
+		CString rs;
+		m_ComboBoxInstance.GetLBText(i, rs);
+
+		if (ls == rs.MakeLower()) {
+			return true;
+		}
+	}
+	return false;
 }
 
 void CNPAPreferences::SetControlAvailabilityFile()

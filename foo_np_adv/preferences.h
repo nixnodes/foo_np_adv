@@ -37,6 +37,7 @@ public:
 		COMMAND_HANDLER_EX(IDC_BUTTON1, BN_CLICKED, OnBnClickedAdd)
 		COMMAND_HANDLER_EX(IDC_BUTTON2, BN_CLICKED, OnBnClickedRemove)
 		COMMAND_HANDLER_EX(IDC_BUTTON3, BN_CLICKED, OnBnClickedFileChooser)
+		COMMAND_HANDLER_EX(IDC_BUTTON4, BN_CLICKED, OnBnClickedRename)
 		COMMAND_HANDLER_EX(IDC_PATTERN, EN_CHANGE, OnEditPatternChange)
 		COMMAND_HANDLER_EX(IDC_CHECK4, BN_CLICKED, OnCheckBoxOnExitClicked)
 		COMMAND_HANDLER_EX(IDC_ON_EXIT, EN_CHANGE, OnChangeDefault)
@@ -51,6 +52,7 @@ private:
 	void OnComboTextChange(UINT, int, CWindow);
 	void OnBnClickedAdd(UINT, int, CWindow);
 	void OnBnClickedRemove(UINT, int, CWindow);
+	void OnBnClickedRename(UINT, int, CWindow);
 	void OnCheckBoxFileClicked(UINT, int, CWindow);
 	void OnCheckBoxDelayClicked(UINT, int, CWindow);
 	void OnCheckBoxOnExitClicked(UINT, int, CWindow);
@@ -70,6 +72,7 @@ private:
 	void SetControlAvailabilityClipboard();
 	void ResetToUnselectedState();
 	void ResetToDefault();
+	bool HasComboString(CString &str);
 
 	void ResetFlags()
 	{
@@ -101,6 +104,7 @@ private:
 	CButton m_ButtonRemoveInstance;
 	CButton m_ButtonEvent;
 	CButton m_ButtonFileChooser;
+	CButton m_ButtonRenameInstance;
 	CWindow m_WinDelaySpin;
 	CStatic m_StaticEncoding;
 
@@ -108,6 +112,7 @@ private:
 	titleformat_object::ptr m_script;
 
 	bool event_flags[EVENT_COUNT];
+	int m_curIndex = -1;
 
 	static const INT idc_delay_hardlimit = 3600000;
 };
