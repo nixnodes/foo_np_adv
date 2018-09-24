@@ -3,6 +3,8 @@ Based on the popular foobar2000 [Now Playing Simple](http://skipyrich.com/wiki/F
 
 Since [NPS](http://skipyrich.com/wiki/Foobar2000:Now_Playing_Simple) source was nowhere to be found, this had to be written from scratch. This project is still in the early stages. If you find any problems please open an issue [here](https://github.com/nixnodes/foo_np_adv/issues). If you want to submit a pull request, feel free to do so.
 
+Only tested on 1.4 so far.
+
 ## Features
 * Multiple instances
 * Logging mode
