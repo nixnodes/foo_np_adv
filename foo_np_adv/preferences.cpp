@@ -131,15 +131,11 @@ bool get_item_using_clipboard(instance_item &out) {
 
 void CNPAPreferences::OnComboInstanceSelChange(UINT, int, CWindow)
 {
-	int curIndex = m_ComboBoxInstance.GetCurSel();
-
-	if (curIndex < 0) {
-		return;
-	}
+	m_curIndex = m_ComboBoxInstance.GetCurSel();
 
 	m_script.release();
 
-	instance_item item = g_cfg_instance_list.get_item(curIndex);
+	instance_item item = g_cfg_instance_list.get_item(m_curIndex);
 
 	uSetDlgItemText(*this, IDC_FILENAME, item.filename);
 	uSetDlgItemText(*this, IDC_PATTERN, item.format_string);
@@ -156,8 +152,6 @@ void CNPAPreferences::OnComboInstanceSelChange(UINT, int, CWindow)
 	for (int i = 0; i < EVENT_COUNT; i++) {
 		event_flags[i] = item.events[i];
 	}
-
-	m_curIndex = curIndex;
 
 	m_EditPattern.EnableWindow(true);
 	m_ButtonEvent.EnableWindow(true);
@@ -201,23 +195,20 @@ void CNPAPreferences::OnComboTextChange(UINT, int, CWindow)
 		return;
 	}
 
-	for (int i = 0; i < m_ComboBoxInstance.GetCount(); i++) {
-		CString str2;
-		m_ComboBoxInstance.GetLBText(i, str2);
-
-		if (str == str2.MakeLower()) {
-			m_ButtonAddInstance.EnableWindow(false);
-			m_ButtonRemoveInstance.EnableWindow(true);
-			m_ButtonRenameInstance.EnableWindow(false);
-			m_ComboBoxInstance.SetCurSel(i);
-			OnComboInstanceSelChange(0, CBN_SELCHANGE, m_ComboBoxInstance);
-			return;
-		}
+	if (HasComboString(str)) {
+		m_ButtonAddInstance.EnableWindow(false);
+		m_ButtonRemoveInstance.EnableWindow(false);
+		m_ButtonRenameInstance.EnableWindow(false);
+		//m_ComboBoxInstance.SetCurSel(i);
+		//OnComboInstanceSelChange(0, CBN_SELCHANGE, m_ComboBoxInstance);
+	}
+	else {
+		m_ButtonAddInstance.EnableWindow(true);
+		m_ButtonRemoveInstance.EnableWindow(false);
+		m_ButtonRenameInstance.EnableWindow(true);
 	}
 
-	m_ButtonAddInstance.EnableWindow(true);
-	m_ButtonRemoveInstance.EnableWindow(false);
-	m_ButtonRenameInstance.EnableWindow(true);
+
 }
 
 void CNPAPreferences::OnBnClickedAdd(UINT, int, CWindow)
@@ -240,16 +231,14 @@ void CNPAPreferences::OnBnClickedAdd(UINT, int, CWindow)
 
 void CNPAPreferences::OnBnClickedRemove(UINT, int, CWindow)
 {
-	int curIndex = m_ComboBoxInstance.GetCurSel();
-
-	if (curIndex < 0) {
+	if (m_curIndex < 0) {
 		return;
 	}
 
-	instance_item &item = g_cfg_instance_list.get_item(curIndex);
+	instance_item &item = g_cfg_instance_list.get_item(m_curIndex);
 
-	g_cfg_instance_list.remove_by_idx(curIndex);
-	m_ComboBoxInstance.DeleteString(curIndex);
+	g_cfg_instance_list.remove_by_idx(m_curIndex);
+	m_ComboBoxInstance.DeleteString(m_curIndex);
 
 	IEvents::RemoveInstance(item.name);
 
@@ -264,15 +253,15 @@ void CNPAPreferences::OnBnClickedRemove(UINT, int, CWindow)
 
 void CNPAPreferences::OnBnClickedRename(UINT, int, CWindow)
 {
+	if (m_curIndex < 0) {
+		return;
+	}
+
 	CString str;
 	GetDlgItemText(IDC_COMBO1, str);
 	str = str.MakeLower();
 
 	if (HasComboString(str)) {
-		return;
-	}
-
-	if (m_curIndex < 0) {
 		return;
 	}
 
@@ -479,13 +468,11 @@ void CNPAPreferences::reset()
 
 void CNPAPreferences::apply()
 {
-	int curIndex = m_ComboBoxInstance.GetCurSel();
-
-	if (curIndex < 0) {
+	if (m_curIndex < 0) {
 		return;
 	}
 
-	instance_item item = g_cfg_instance_list.get_item(curIndex);
+	instance_item item = g_cfg_instance_list.get_item(m_curIndex);
 
 	pfc::string8 str;
 
@@ -514,7 +501,7 @@ void CNPAPreferences::apply()
 		item.events[i] = event_flags[i];
 	}
 
-	g_cfg_instance_list.replace_item(curIndex, item);
+	g_cfg_instance_list.replace_item(m_curIndex, item);
 	IEvents::UpdateInstance(&item);
 
 	OnChanged();
@@ -522,13 +509,11 @@ void CNPAPreferences::apply()
 
 bool CNPAPreferences::HasChanged()
 {
-	int curIndex = m_ComboBoxInstance.GetCurSel();
-
-	if (curIndex < 0) {
+	if (m_curIndex < 0) {
 		return false;
 	}
 
-	instance_item item = g_cfg_instance_list.get_item(curIndex);
+	instance_item item = g_cfg_instance_list.get_item(m_curIndex);
 
 	if (m_CheckBoxLogMode.IsChecked() != item.log_mode) {
 		return true;
