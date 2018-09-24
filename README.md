@@ -1,7 +1,7 @@
 # foo_np_adv
 Based on the popular foobar2000 [Now Playing Simple](http://skipyrich.com/wiki/Foobar2000:Now_Playing_Simple) plugin, this one offers the same functionality with one key difference: multiple instances can be defined, each with its own unique set of options. First instance may write what is currently playing, second logging playback, third writing a progress bar and so on..
 
-Since [NPS](http://skipyrich.com/wiki/Foobar2000:Now_Playing_Simple) source was nowhere to be found, this had to be written from scratch. This project is still in the early stages. If you find any problems please open an issue [here](https://github.com/nixnodes/foo_np_adv/issues). If you want to submit a pull request, feel free to do so.
+Since [NPS](http://skipyrich.com/wiki/Foobar2000:Now_Playing_Simple) source was nowhere to be found, this had to be written from scratch. The project is still in its early stages. If you find any problems please open an issue [here](https://github.com/nixnodes/foo_np_adv/issues). If you want to submit a pull request, feel free to do so.
 
 Only tested on 1.4 so far.
 
