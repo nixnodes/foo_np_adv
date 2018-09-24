@@ -40,7 +40,7 @@ Output:
   - Empty when stopped
   
 #### Playback logging
-Format: `$strftime('[%d/%m/%y %T]') $if($meta_test(artist,title),%artist% - %title% ,%title%),)`  
+Format: `$strftime('[%d/%m/%y %T]') $if($meta_test(artist,title),%artist% - %title% ,%title%)`  
 Events: New track  
 Options: Log mode enabled  
 Output: `[10/9/18 12:00:01] Muzzy - Junction Seven`
