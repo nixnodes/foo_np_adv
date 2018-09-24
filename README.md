@@ -27,7 +27,30 @@ Since [NPS](http://skipyrich.com/wiki/Foobar2000:Now_Playing_Simple) source was 
   - `%time%` (time only)
 * Functions
   - `$strftime('<format>')` - custom formatted time (see [here](http://www.cplusplus.com/reference/ctime/strftime/) for format specifiers, modifiers not supported)
+ 
+## Examples
+#### Basic now playing
+Format: `$if(%isplaying%,$if(%ispaused%,|| ,|> )$if($meta_test(artist,title),%artist% - %title% ,%title%),)`  
+Events: New track, Playback stop, Playback pause  
+Output:  
+  - Playing: `|> Muzzy - Junction Seven`
+  - Paused:  `|| Muzzy - Junction Seven`
+  - Empty when stopped
   
+#### Playback logging
+Format: `$strftime('[%d/%m/%y %T]') $if($meta_test(artist,title),%artist% - %title% ,%title%),)`  
+Events: New track  
+Options: Log mode enabled  
+Output: `[10/9/18 12:00:01] Muzzy - Junction Seven`
+
+#### Progress bar with time
+Format: `$if(%isplaying%,$progress(%_time_elapsed_seconds%,%_time_total_seconds%,20,$if(%ispaused%,|,#),'=') %playback_time%/%length%)`  
+Events: New track, Playback stop, Playback pause, Playback time  
+Output:
+  - Playing: `==============#===== 3:40/5:05`
+  - Paused:  `==============|===== 3:40/5:05`
+  - Empty when stopped  
+
 ## Installation
 Download the latest zipped release from [here](https://github.com/nixnodes/foo_np_adv/releases).
 * Manual
