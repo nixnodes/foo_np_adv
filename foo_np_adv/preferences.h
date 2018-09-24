@@ -57,6 +57,7 @@ private:
 	void OnEditPatternChange(UINT, int, CWindow);
 	void OnEditDelayChange(UINT, int, CWindow);
 	void OnContextMenu(CWindow wnd, CPoint point);
+
 	void PatternPreviewUpdate(uint32_t event, bool force = false);
 	bool HasChanged();
 	void OnChanged();
@@ -83,7 +84,7 @@ private:
 
 	CComboBox m_ComboBoxInstance;
 	CComboBox m_ComboBoxEncoding;
-	
+
 	CCheckBox m_CheckBoxLogMode;
 	CCheckBox m_CheckBoxWriteToFile;
 	CCheckBox m_CheckBoxDelay;

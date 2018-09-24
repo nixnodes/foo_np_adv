@@ -199,7 +199,7 @@ void CNPAPreferences::OnBnClickedAdd(UINT, int, CWindow)
 {
 	CString str;
 	GetDlgItemText(IDC_COMBO1, str);
-	CT2CA pszCAS(str.MakeLower());
+	str = str.MakeLower();
 
 	for (int i = 0; i < m_ComboBoxInstance.GetCount(); i++) {
 		CString str2;
@@ -210,7 +210,7 @@ void CNPAPreferences::OnBnClickedAdd(UINT, int, CWindow)
 		}
 	}
 
-	instance_item item((pfc::string8) pszCAS, "", "", false, false, false, 0, {}, false, "", ENCODING_UTF8);
+	instance_item item(pfc::string8(CT2CA(str)), "", "", false, false, false, 0, {}, false, "", ENCODING_UTF8);
 	g_cfg_instance_list.add_item(item);
 	m_ComboBoxInstance.InsertString(m_ComboBoxInstance.GetCount(), str);
 	m_ComboBoxInstance.SetCurSel(m_ComboBoxInstance.GetCount() - 1);
@@ -313,12 +313,22 @@ void CNPAPreferences::OnBnClickedFileChooser(UINT, int, CWindow)
 	ofn.lpstrFile = szFile;
 	ofn.nMaxFile = MAX_PATH;
 	ofn.lpstrFilter = _T("Text\0*.txt\0All\0*.*\0");
+	ofn.lpstrDefExt = (LPCWSTR)NULL;
 	ofn.nFilterIndex = 1;
 	ofn.lpstrInitialDir = NULL;
 	ofn.Flags = OFN_PATHMUSTEXIST | OFN_EXPLORER;
 
+
 	if (GetSaveFileName(&ofn)) {
-		SetDlgItemText(IDC_FILENAME, szFile);
+		pfc::string8 fn = pfc::string8(CT2CA(szFile));
+
+		if (ofn.nFileExtension == 0) {
+			if (ofn.nFilterIndex == 1) {
+				fn << ".txt";
+			}
+		}
+
+		uSetDlgItemText(*this, IDC_FILENAME, fn);
 		OnChanged();
 	}
 
@@ -404,7 +414,7 @@ void CNPAPreferences::apply()
 
 	uGetDlgItemText(*this, IDC_FILENAME, str);
 	if (m_CheckBoxWriteToFile.IsChecked() && str.length() == 0) {
-		popup_message::g_complain("No file set");
+		popup_message::g_complain("Set a file path");
 		OnChanged();
 		return;
 	}
@@ -499,19 +509,16 @@ void CNPAPreferences::OnChanged()
 
 void CNPAPreferences::PatternPreviewUpdate(uint32_t event, bool force)
 {
-	bool trigger;
 	if (force || m_script.is_empty()) {
 		pfc::string8 pattern;
 		uGetDlgItemText(*this, IDC_PATTERN, pattern);
 		static_api_ptr_t<titleformat_compiler>()->compile_safe_ex(m_script, pattern);
-		trigger = true;
+		uSetDlgItemText(*this, IDC_PREVIEW, format_title(m_script));
 	}
 	else {
-		trigger = event_flags[event];
-	}
-
-	if (trigger) {
-		uSetDlgItemText(*this, IDC_PREVIEW, format_title(m_script));
+		if (event_flags[event]) {
+			uSetDlgItemText(*this, IDC_PREVIEW, format_title(m_script));
+		}
 	}
 }
 

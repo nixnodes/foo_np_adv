@@ -3,13 +3,12 @@
 #include "stdafx.h"
 #include "prefs_instance.h"
 #include "event_enums.h"
+#include "datetime.h"
 
 #include <map>
 #include <vector>
 #include <string>
 #include <sstream>
-
-#include "datetime.h"
 
 static std::map<int, std::vector<pfc::string8>> _evtostr = {
 	{EVENT_PLAYBACK_STARTING, {"Playback start","Trigger when playback starts"}},
@@ -23,6 +22,8 @@ static std::map<int, std::vector<pfc::string8>> _evtostr = {
 	{EVENT_PLAYBACK_TIME, {"Playback time","Trigger every second"}},
 	{EVENT_VOLCHANGE, {"Volume change",""}},
 };
+
+#define MSG_EVENT_UNKNOWN	"EVENT_UNKNOWN"
 
 #define TR_RETURN(x) p_found_flag = x; return x;
 
@@ -60,9 +61,6 @@ public:
 			metadb_handle_ptr dummy;
 			if (metadb::g_get_random_handle(dummy)) {
 				dummy->format_title(&titleformat_hook_glob(), state, m_script, NULL);
-			}
-			else {
-				state.reset();
 			}
 		}
 		return state;
@@ -156,7 +154,7 @@ public:
 			return _evtostr[ev][0];
 		}
 		else {
-			return "EVENT_UNKNOWN";
+			return MSG_EVENT_UNKNOWN;
 		}
 	}
 
@@ -166,7 +164,7 @@ public:
 			return _evtostr[ev][1];
 		}
 		else {
-			return "EVENT_UNKNOWN";
+			return MSG_EVENT_UNKNOWN;
 		}
 	}
 

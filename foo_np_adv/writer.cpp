@@ -35,7 +35,7 @@ void CWriter::worker()
 {
 	while (true)
 	{
-		write_job j = q.pop();
+		const write_job j = q.pop();
 		if (j.flags & F_WRITER_ABORT) {
 			break;
 		}
@@ -56,7 +56,7 @@ string unicode2ansi(const wstring &wstr)
 	return strTo;
 }
 
-void CWriter::Write(write_job *j) {
+void CWriter::Write(const write_job *j) {
 	try {
 		int flags = ios::out;
 		if (j->flags & F_WRITER_APPEND) {

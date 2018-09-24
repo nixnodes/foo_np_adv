@@ -34,14 +34,12 @@ public:
 	}
 	~CWriter()
 	{
-		
-		write_job j(F_WRITER_ABORT);
-		q.push(j, true);
+		q.push(write_job(F_WRITER_ABORT), true);
 		t->join();
 	}
 
 	void QueueWrite(const write_job *j) { q.push(*j); }
-	static void Write(write_job *j);
+	static void Write(const write_job *j);
 
 private:
 	void worker();
