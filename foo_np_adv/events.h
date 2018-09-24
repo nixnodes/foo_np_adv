@@ -33,6 +33,7 @@ public:
 
 private:
 	static_api_ptr_t<playback_control> m_playback_control;
+	static_api_ptr_t<playlist_manager> m_playlist_manager;
 };
 
 typedef struct event_item_s {

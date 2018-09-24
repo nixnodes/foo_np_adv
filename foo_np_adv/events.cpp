@@ -94,6 +94,24 @@ bool titleformat_hook_glob::process_field(titleformat_text_out * p_out, const ch
 		p_out->write(titleformat_inputtypes::unknown, CDateTime().time());
 		TR_RETURN(true)
 	}
+	else if (pfc::stricmp_ascii_ex(p_name, p_name_length, "active_playlist_name", pfc::infinite_size) == 0) {
+		pfc::string8 name;
+		if (!m_playlist_manager->activeplaylist_get_name(name)) {
+			TR_RETURN2(false, true)
+		}
+		p_out->write(titleformat_inputtypes::unknown, name);
+		TR_RETURN(true)
+	}
+	else if (pfc::stricmp_ascii_ex(p_name, p_name_length, "playing_playlist_name", pfc::infinite_size) == 0) {
+		pfc::string8 name;
+		t_size pindex = m_playlist_manager->get_playing_playlist();
+		if (pindex == pfc::infinite_size ||
+			!m_playlist_manager->playlist_get_name(pindex, name)) {
+			TR_RETURN2(false, true)
+		}
+		p_out->write(titleformat_inputtypes::unknown, name);
+		TR_RETURN(true)
+	}
 	else {
 		TR_RETURN(false)
 	}

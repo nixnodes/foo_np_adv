@@ -27,6 +27,8 @@ Only tested on 1.4 so far.
   - `%volume%` (dB)
   - `%datetime%` (full date and time)
   - `%time%` (time only)
+  - `%playing_playlist_name%` (playlist from which playing items are taken from)
+  - `%active_playlist_name%`
 * Functions
   - `$strftime('<format>')` - custom formatted time (see [here](http://www.cplusplus.com/reference/ctime/strftime/) for format specifiers, modifiers not supported)
  
