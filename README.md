@@ -26,7 +26,7 @@ Since [NPS](http://skipyrich.com/wiki/Foobar2000:Now_Playing_Simple) source was 
   - `%datetime%` (full date and time)
   - `%time%` (time only)
 * Functions
-  - `$strftime('<format>')` (see [here](http://www.cplusplus.com/reference/ctime/strftime/) for format specifiers, modifiers not supported)
+  - `$strftime('<format>')` - custom formatted time (see [here](http://www.cplusplus.com/reference/ctime/strftime/) for format specifiers, modifiers not supported)
   
 ## Installation
 Download the latest zipped release from [here](https://github.com/nixnodes/foo_np_adv/releases).
