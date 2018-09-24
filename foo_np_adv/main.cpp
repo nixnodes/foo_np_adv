@@ -1,4 +1,4 @@
 #include "stdafx.h"
 
-DECLARE_COMPONENT_VERSION(COMMON_NAME, "0.9.2", "Writes formatted strings to files.");
+DECLARE_COMPONENT_VERSION(COMMON_NAME, "0.9.3", "Writes formatted strings to files.");
 VALIDATE_COMPONENT_FILENAME("foo_np_advanced.dll");
