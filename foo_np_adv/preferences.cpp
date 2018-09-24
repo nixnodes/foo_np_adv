@@ -34,7 +34,7 @@ BOOL CNPAPreferences::OnInitDialog(CWindow, LPARAM)
 
 	SetDlgItemInt(IDC_DELAY, 0, false);
 
-	m_ComboBoxEncoding.AddString(_T("CP-1252"));
+	m_ComboBoxEncoding.AddString(_T("ANSI"));
 	m_ComboBoxEncoding.AddString(_T("UTF-8"));
 	m_ComboBoxEncoding.AddString(_T("UTF-8 BOM"));
 	m_ComboBoxEncoding.AddString(_T("UCS-2 BE"));

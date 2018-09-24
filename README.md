@@ -10,7 +10,7 @@ Since [NPS](http://skipyrich.com/wiki/Foobar2000:Now_Playing_Simple) source was 
 * Write on exit
 * Asynchronous writes
 * Character encoding
-  - [CP-1252](https://en.wikipedia.org/wiki/Windows-1252)
+  - [ANSI](https://en.wikipedia.org/wiki/Windows_code_page#ANSI_code_page)
   - [UTF-8](https://en.wikipedia.org/wiki/UTF-8) (header optional)
   - [UCS-2](https://en.wikipedia.org/wiki/Universal_Coded_Character_Set) (header optional, big/little endian)
 * Trigger events

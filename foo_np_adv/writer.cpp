@@ -66,7 +66,7 @@ void CWriter::Write(const write_job *j) {
 			flags |= ios::trunc;
 		}
 
-		if (j->encoding == ENCODING_CP1252) {
+		if (j->encoding == ENCODING_ANSI) {
 			fstream fs;
 			fs.open(j->file, flags);
 			fs << unicode2ansi(widen(j->data));
