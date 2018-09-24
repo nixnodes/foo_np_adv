@@ -41,6 +41,7 @@ public:
 		COMMAND_HANDLER_EX(IDC_PATTERN, EN_CHANGE, OnEditPatternChange)
 		COMMAND_HANDLER_EX(IDC_CHECK4, BN_CLICKED, OnCheckBoxOnExitClicked)
 		COMMAND_HANDLER_EX(IDC_ON_EXIT, EN_CHANGE, OnChangeDefault)
+		COMMAND_HANDLER_EX(IDC_CHECK5, BN_CLICKED, OnChangeDefault)
 		MSG_WM_CONTEXTMENU(OnContextMenu)
 	END_MSG_MAP()
 private:
@@ -84,11 +85,11 @@ private:
 
 	CComboBox m_ComboBoxInstance;
 	CComboBox m_ComboBoxEncoding;
-
 	CCheckBox m_CheckBoxLogMode;
 	CCheckBox m_CheckBoxWriteToFile;
 	CCheckBox m_CheckBoxDelay;
 	CCheckBox m_CheckBoxOnExit;
+	CCheckBox m_ChangesOnly;
 	CEdit m_EditFilename;
 	CEdit m_EditPattern;
 	CEdit m_EditDelay;

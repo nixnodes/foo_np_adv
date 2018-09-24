@@ -3,6 +3,7 @@
 #include "writer.h"
 
 CEvents *IEvents::m_Events = nullptr;
+static std::map<pfc::string8, instance_state> c_instst;
 
 event_item CEvents::UpdateInstance(instance_item *item)
 {
@@ -16,6 +17,8 @@ event_item CEvents::UpdateInstance(instance_item *item)
 		}
 	}
 
+	c_instst[item->name] = instance_state();
+	
 	return evitem;
 }
 
@@ -28,15 +31,31 @@ void CEvents::RemoveInstance(pfc::string8 name) {
 			}
 		}
 	}
+
+	if (c_instst.count(name) > 0) {
+		c_instst.erase(name);
+	}
 }
 
 void CEvents::event_update(uint32_t event) {
 	for (const auto &p : m_instancemap[event]) {
-		titleformat_object::ptr m_script = p.second.m_script;
+		event_item &ievent = (event_item&)p.second;
+		titleformat_object::ptr m_script = ievent.m_script;
 		pfc::string8 state = format_title(m_script);
-		const instance_item &item = p.second.item;
+
+		const instance_item &item = ievent.item;
 
 		if (item.write_to_file) {
+			instance_state &st = c_instst[item.name];
+			if (item.changes_only) {				
+				if (st.last_state == state && 
+					st.ponce != false) {
+					continue;
+				}
+			}
+			st.ponce = true;
+			st.last_state = state;
+
 			uint32_t flags;
 
 			if (item.log_mode) {

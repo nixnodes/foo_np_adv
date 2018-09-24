@@ -20,6 +20,7 @@
 #define IDC_CONTEXTMENU                 1014
 #define IDC_BUTTON3                     1015
 #define IDC_CHECK3                      1016
+#define IDC_CHECK5                      1017
 #define IDC_DELAY                       1018
 #define IDC_SPIN2                       1019
 #define IDC_SPIN1                       1019

@@ -15,12 +15,27 @@ typedef struct instance_item_s {
 	bool on_exit;
 	pfc::string8 on_exit_str;
 	uint8_t encoding;
+	bool changes_only;
+	bool _breserved1 = false;
+	bool _breserved2 = false;
+	bool _breserved3 = false;
+	bool _breserved4 = false;
+	uint32_t _u32reserved1 = 0;
+	uint32_t _u32reserved2 = 0;
+	uint32_t _u32reserved3 = 0;
+	uint32_t _u32reserved4 = 0;
+	pfc::string8 _sreserved1;
+	pfc::string8 _sreserved2;
+	pfc::string8 _sreserved3;
+	pfc::string8 _sreserved4;
 
 	instance_item_s(const char * p_name, const char * p_filename, const char * p_format_string,
 		const bool p_write_to_file, const bool p_log_mode, const bool p_enable_delay, const uint32_t p_delay,
-		const bool(&p_events)[EVENT_COUNT], const bool p_on_exit, const char *p_on_exit_str, const uint8_t p_encoding)
+		const bool(&p_events)[EVENT_COUNT], const bool p_on_exit, const char *p_on_exit_str, const uint8_t p_encoding,
+		const bool p_changes_only)
 		: name(p_name), filename(p_filename), format_string(p_format_string), log_mode(p_log_mode),
-		enable_delay(p_enable_delay), delay(p_delay), on_exit(p_on_exit), on_exit_str(p_on_exit_str), encoding(p_encoding)
+		enable_delay(p_enable_delay), delay(p_delay), on_exit(p_on_exit), on_exit_str(p_on_exit_str),
+		encoding(p_encoding), changes_only(p_changes_only)
 	{
 		for (uint32_t i = 0; i < EVENT_COUNT; i++) {
 			events[i] = p_events[i];
@@ -30,17 +45,17 @@ typedef struct instance_item_s {
 	}
 	instance_item_s(const char * p_name, const char * p_filename, const char * p_format_string, const bool p_write_to_file,
 		const bool p_log_mode, const bool p_enable_delay, const uint32_t p_delay, const std::initializer_list <uint32_t> p_events,
-		const bool p_on_exit, const char *p_on_exit_str, const uint8_t p_encoding)
+		const bool p_on_exit, const char *p_on_exit_str, const uint8_t p_encoding, const bool p_changes_only)
 		: name(p_name), filename(p_filename), format_string(p_format_string), log_mode(p_log_mode),
 		enable_delay(p_enable_delay), delay(p_delay), write_to_file(p_write_to_file), on_exit(p_on_exit),
-		on_exit_str(p_on_exit_str), encoding(p_encoding)
+		on_exit_str(p_on_exit_str), encoding(p_encoding), changes_only(p_changes_only)
 	{
 		reset_events();
 
 		for (auto f : p_events) {
 			if (f >= EVENT_COUNT) {
 				pfc::string_formatter str;
-				console::print(str << "WARNING: got invalid event during 'instance_item_s' initialization: " << f);
+				console::info(str << "WARNING: got invalid event during 'instance_item_s' initialization: " << f);
 			}
 			else {
 				events[f] = true;
@@ -69,7 +84,11 @@ FB2K_STREAM_READER_OVERLOAD(instance_item) {
 	stream >> value.name >> value.filename >> value.format_string >>
 		value.write_to_file >> value.log_mode >> value.enable_delay >>
 		value.delay >> value.events >> value.on_exit >> value.on_exit_str >>
-		value.encoding;
+		value.encoding >> value.changes_only
+		
+		>> value._breserved1 >> value._breserved2 >> value._breserved3 >> value._breserved4 
+		>> value._u32reserved1 >> value._u32reserved2 >> value._u32reserved3 >> value._u32reserved4
+		>> value._sreserved1 >> value._sreserved2 >> value._sreserved3 >> value._sreserved4;
 	return stream;
 }
 
@@ -77,6 +96,10 @@ FB2K_STREAM_WRITER_OVERLOAD(instance_item) {
 	stream << value.name << value.filename << value.format_string <<
 		value.write_to_file << value.log_mode << value.enable_delay <<
 		value.delay << value.events << value.on_exit << value.on_exit_str <<
-		value.encoding;
+		value.encoding << value.changes_only
+
+		<< value._breserved1 << value._breserved2 << value._breserved3 << value._breserved4
+		<< value._u32reserved1 << value._u32reserved2 << value._u32reserved3 << value._u32reserved4
+		<< value._sreserved1 << value._sreserved2 << value._sreserved3 << value._sreserved4;
 	return stream;
 }

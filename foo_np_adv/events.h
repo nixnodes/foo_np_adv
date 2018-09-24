@@ -49,6 +49,12 @@ typedef struct event_item_s {
 
 } event_item;
 
+typedef struct instance_state_s {
+	pfc::string8 last_state;
+	bool ponce = false;
+	instance_state_s() {}
+} instance_state;
+
 class CEventsBase : private play_callback_impl_base {
 public:
 

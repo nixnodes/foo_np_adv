@@ -28,6 +28,7 @@ BOOL CNPAPreferences::OnInitDialog(CWindow, LPARAM)
 	m_EditOnExit = GetDlgItem(IDC_ON_EXIT);
 	m_ComboBoxEncoding = GetDlgItem(IDC_ENCODING);
 	m_StaticEncoding = GetDlgItem(IDC_STATIC5);
+	m_ChangesOnly = GetDlgItem(IDC_CHECK5);
 
 	SendMessage(m_WinDelaySpin, UDM_SETBUDDY, (WPARAM)(HWND)m_EditDelay, 0);
 	SendMessage(m_WinDelaySpin, UDM_SETRANGE32, 0, CNPAPreferences::idc_delay_hardlimit);
@@ -91,6 +92,7 @@ void CNPAPreferences::ResetToUnselectedState()
 	m_EditOnExit.EnableWindow(false);
 	m_ComboBoxEncoding.EnableWindow(false);
 	m_StaticEncoding.EnableWindow(false);
+	m_ChangesOnly.EnableWindow(false);
 	ResetFlags();
 }
 
@@ -112,6 +114,7 @@ void CNPAPreferences::ResetToDefault()
 	m_EditOnExit.EnableWindow(false);
 	m_ComboBoxEncoding.EnableWindow(false);
 	m_StaticEncoding.EnableWindow(false);
+	m_ChangesOnly.EnableWindow(false);
 	ResetFlags();
 }
 
@@ -134,6 +137,7 @@ void CNPAPreferences::OnComboInstanceSelChange(UINT, int, CWindow)
 	m_CheckBoxLogMode.SetCheck(item.log_mode ? 1 : 0);
 	m_CheckBoxDelay.SetCheck(item.enable_delay ? 1 : 0);
 	m_CheckBoxOnExit.SetCheck(item.on_exit ? 1 : 0);
+	m_ChangesOnly.SetCheck(item.changes_only ? 1 : 0);
 	SetDlgItemInt(IDC_DELAY, item.delay);
 	m_ComboBoxEncoding.SetCurSel(item.encoding);
 
@@ -210,7 +214,8 @@ void CNPAPreferences::OnBnClickedAdd(UINT, int, CWindow)
 		}
 	}
 
-	instance_item item(pfc::string8(CT2CA(str)), "", "", false, false, false, 0, {}, false, "", ENCODING_UTF8);
+	instance_item item(pfc::string8(CT2CA(str)), "", "", false, 
+		false, false, 0, {}, false, "", ENCODING_UTF8, false);
 	g_cfg_instance_list.add_item(item);
 	m_ComboBoxInstance.InsertString(m_ComboBoxInstance.GetCount(), str);
 	m_ComboBoxInstance.SetCurSel(m_ComboBoxInstance.GetCount() - 1);
@@ -250,6 +255,7 @@ void CNPAPreferences::SetControlAvailabilityFile()
 		m_CheckBoxDelay.EnableWindow(true);
 		m_ComboBoxEncoding.EnableWindow(true);
 		m_StaticEncoding.EnableWindow(true);
+		m_ChangesOnly.EnableWindow(true);
 	}
 	else {
 		m_EditFilename.EnableWindow(false);
@@ -258,6 +264,7 @@ void CNPAPreferences::SetControlAvailabilityFile()
 		m_CheckBoxDelay.EnableWindow(false);
 		m_ComboBoxEncoding.EnableWindow(false);
 		m_StaticEncoding.EnableWindow(false);
+		m_ChangesOnly.EnableWindow(false);
 	}
 	SetControlAvailabilityDelay();
 }
@@ -429,6 +436,7 @@ void CNPAPreferences::apply()
 	item.log_mode = m_CheckBoxLogMode.IsChecked();
 	item.enable_delay = m_CheckBoxDelay.IsChecked();
 	item.on_exit = m_CheckBoxOnExit.IsChecked();
+	item.changes_only = m_ChangesOnly.IsChecked();
 	item.delay = (uint32_t)GetDlgItemInt(IDC_DELAY, false);
 
 	for (int i = 0; i < EVENT_COUNT; i++) {
@@ -468,6 +476,10 @@ bool CNPAPreferences::HasChanged()
 	}
 
 	if (m_CheckBoxOnExit.IsChecked() != item.on_exit) {
+		return true;
+	}
+
+	if (m_ChangesOnly.IsChecked() != item.changes_only) {
 		return true;
 	}
 
