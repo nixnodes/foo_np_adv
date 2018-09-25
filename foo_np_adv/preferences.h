@@ -73,6 +73,7 @@ private:
 	void ResetToUnselectedState();
 	void ResetToDefault();
 	bool HasComboString(CString &str);
+	void ComboInstanceSelect(int index);
 
 	void ResetFlags()
 	{

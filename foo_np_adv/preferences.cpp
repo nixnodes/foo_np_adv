@@ -44,6 +44,10 @@ BOOL CNPAPreferences::OnInitDialog(CWindow, LPARAM)
 
 	PopulateContextList();
 
+	if (m_ComboBoxInstance.GetCount() > 0) {
+		ComboInstanceSelect(0);
+	}
+
 	return FALSE;
 }
 
@@ -53,11 +57,6 @@ void CNPAPreferences::PopulateContextList()
 		instance_item &item = g_cfg_instance_list.get_item(i);
 		CA2T w_name(item.name.c_str());
 		m_ComboBoxInstance.AddString(w_name);
-	}
-
-	if (m_ComboBoxInstance.GetCount() > 0) {
-		m_ComboBoxInstance.SetCurSel(0);
-		OnComboInstanceSelChange(0, CBN_SELCHANGE, m_ComboBoxInstance);
 	}
 }
 
@@ -127,6 +126,11 @@ bool get_item_using_clipboard(instance_item &out) {
 		}
 	}
 	return false;
+}
+
+void CNPAPreferences::ComboInstanceSelect(int index) {
+	m_ComboBoxInstance.SetCurSel(index);
+	OnComboInstanceSelChange(0, CBN_SELCHANGE, m_ComboBoxInstance);
 }
 
 void CNPAPreferences::OnComboInstanceSelChange(UINT, int, CWindow)
@@ -199,8 +203,6 @@ void CNPAPreferences::OnComboTextChange(UINT, int, CWindow)
 		m_ButtonAddInstance.EnableWindow(false);
 		m_ButtonRemoveInstance.EnableWindow(false);
 		m_ButtonRenameInstance.EnableWindow(false);
-		//m_ComboBoxInstance.SetCurSel(i);
-		//OnComboInstanceSelChange(0, CBN_SELCHANGE, m_ComboBoxInstance);
 	}
 	else {
 		m_ButtonAddInstance.EnableWindow(true);
@@ -225,8 +227,7 @@ void CNPAPreferences::OnBnClickedAdd(UINT, int, CWindow)
 		false, false, 0, {}, false, "", ENCODING_UTF8, false, false);
 	g_cfg_instance_list.add_item(item);
 	m_ComboBoxInstance.InsertString(m_ComboBoxInstance.GetCount(), str);
-	m_ComboBoxInstance.SetCurSel(m_ComboBoxInstance.GetCount() - 1);
-	OnComboInstanceSelChange(0, CBN_SELCHANGE, m_ComboBoxInstance);
+	ComboInstanceSelect(m_ComboBoxInstance.GetCount() - 1);
 }
 
 void CNPAPreferences::OnBnClickedRemove(UINT, int, CWindow)
@@ -243,8 +244,7 @@ void CNPAPreferences::OnBnClickedRemove(UINT, int, CWindow)
 	IEvents::RemoveInstance(item.name);
 
 	if (m_ComboBoxInstance.GetCount() > 0) {
-		m_ComboBoxInstance.SetCurSel(max(m_ComboBoxInstance.GetCount() - 1, 0));
-		OnComboInstanceSelChange(0, CBN_SELCHANGE, m_ComboBoxInstance);
+		ComboInstanceSelect(max(m_ComboBoxInstance.GetCount() - 1, 0));
 	}
 	else {
 		ResetToUnselectedState();
