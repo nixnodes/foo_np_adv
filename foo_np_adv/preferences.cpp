@@ -214,8 +214,6 @@ void CNPAPreferences::OnComboTextChange(UINT, int, CWindow)
 		m_ButtonRemoveInstance.EnableWindow(false);
 		m_ButtonRenameInstance.EnableWindow(true);
 	}
-
-
 }
 
 void CNPAPreferences::OnBnClickedAdd(UINT, int, CWindow)
@@ -477,6 +475,18 @@ void CNPAPreferences::config_export(pfc::string8 &fn) {
 	}
 }
 
+static t_size find_instance(const pfc::string8 &name, instance_item &out, t_size &index) {
+	for (t_size i = 0; i < g_cfg_instance_list.get_count(); i++) {
+		const instance_item &item = g_cfg_instance_list.get_item(i);
+		if (item.name == name) {
+			index = i;
+			out = item;
+			return true;
+		}
+	}
+	return false;
+}
+
 void CNPAPreferences::config_import(pfc::string8 &fn) {
 	Json::Value root;
 	try {
@@ -506,17 +516,36 @@ void CNPAPreferences::config_import(pfc::string8 &fn) {
 		return;
 	}
 
-	m_ComboBoxInstance.ResetContent();
-	IEvents::Clear();
-	g_cfg_instance_list.remove_all();
-	
-	for (const auto &item : items) {
-		g_cfg_instance_list.add_item(item);
-		IEvents::UpdateInstance(&item);
-		m_ComboBoxInstance.AddString(CA2CT(item.name));
+	bool wasempty;
+	if (m_ComboBoxInstance.GetCount() == 0) {
+		wasempty = true;
+	}
+	else {
+		wasempty = false;
 	}
 
-	ComboInstanceSelect(0);
+	console::info("NPA: Starting import");
+	pfc::string8 s;
+	for (const auto &item : items) {
+		instance_item ex;
+		t_size index;
+		if (find_instance(item.name, ex, index)) {
+			console::info(s << "NPA: Updating instance '" << item.name << "'");
+			g_cfg_instance_list.replace_item(index, ex);
+		}
+		else {
+			console::info(s << "NPA: Adding instance: '" << item.name << "'");
+			g_cfg_instance_list.add_item(item);
+			m_ComboBoxInstance.AddString(CA2CT(item.name));
+		}
+		s.reset();
+		IEvents::UpdateInstance(&item);
+	}
+	console::info("NPA: Import done");
+
+	if (wasempty) {
+		ComboInstanceSelect(0);
+	}
 
 }
 
