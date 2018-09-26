@@ -459,6 +459,9 @@ void CNPAPreferences::OnEditDelayChange(UINT, int, CWindow) {
 
 void CNPAPreferences::config_export(pfc::string8 &fn) {
 	try {
+		if (g_cfg_instance_list.get_count() == 0) {
+			return;
+		}
 		Json::Value root;
 		for (t_size i = 0; i < g_cfg_instance_list.get_count(); i++) {
 			instance_item &item = g_cfg_instance_list.get_item(i);
@@ -557,7 +560,9 @@ void CNPAPreferences::OnContextMenu(CWindow wnd, CPoint point) {
 			};
 
 			menu.AppendMenu(MF_STRING, ID_IMPORT, _T("Import"));
-			menu.AppendMenu(MF_STRING, ID_EXPORT, _T("Export"));
+			if (g_cfg_instance_list.get_count() > 0) {
+				menu.AppendMenu(MF_STRING, ID_EXPORT, _T("Export"));
+			}
 
 			int cmd = menu.TrackPopupMenu(TPM_RIGHTBUTTON | TPM_NONOTIFY | TPM_RETURNCMD, point.x, point.y, menudesc, 0);
 			if (cmd > 0) {
