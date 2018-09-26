@@ -29,10 +29,12 @@ public:
 		case init_stages::before_config_read:;
 			IEvents::Initialize();
 			IWriter::Initialize();
+			break;
 		case init_stages::after_config_read:;
 			for (t_size i = 0; i < IConfig::Count(); i++) {
 				IEvents::UpdateInstance(&IConfig::Get(i));
 			}
+			break;
 		}
 	}
 };
