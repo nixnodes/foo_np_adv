@@ -84,7 +84,7 @@ private:
 	void config_export(pfc::string8 &fn);
 	void config_import(pfc::string8 &fn);
 
-	bool file_dialog(int mode, pfc::string8 &out, std::vector<fn_filter> &filter);
+	bool file_dialog(int mode, pfc::string8 &out, const std::vector<fn_filter> &filter);
 
 	enum {
 		FN_DIALOG_SAVE = 0,

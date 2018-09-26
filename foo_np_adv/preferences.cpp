@@ -376,7 +376,7 @@ void CNPAPreferences::OnCheckBoxClipboardClick(UINT, int, CWindow) {
 	OnChanged();
 }
 
-bool CNPAPreferences::file_dialog(int mode, pfc::string8 &out, vector<fn_filter> &filter) {
+bool CNPAPreferences::file_dialog(int mode, pfc::string8 &out, const vector<fn_filter> &filter) {
 	LPWSTR szFile = (LPWSTR)malloc(MAX_PATH);
 
 	OPENFILENAME ofn;
@@ -416,7 +416,7 @@ bool CNPAPreferences::file_dialog(int mode, pfc::string8 &out, vector<fn_filter>
 
 		if (ofn.nFileExtension == 0) {
 			if (ofn.nFilterIndex > 0 && ofn.nFilterIndex <= filter.size()) {
-				fn_filter &f = filter[ofn.nFilterIndex - 1];
+				const fn_filter &f = filter[ofn.nFilterIndex - 1];
 				if (f.ext != pfc::string8("*")) {
 					fn << "." << f.ext;
 				}
@@ -433,7 +433,7 @@ bool CNPAPreferences::file_dialog(int mode, pfc::string8 &out, vector<fn_filter>
 void CNPAPreferences::OnBnClickedFileChooser(UINT, int, CWindow)
 {
 	pfc::string8 fn;
-	vector<fn_filter> fmt = {
+	const vector<fn_filter> fmt = {
 		fn_filter("txt", "Text") ,
 		fn_filter("*", "All")
 	};
@@ -563,7 +563,7 @@ void CNPAPreferences::OnContextMenu(CWindow wnd, CPoint point) {
 			if (cmd > 0) {
 				pfc::string8 fn;
 				if (cmd == ID_IMPORT) {
-					vector<fn_filter> fmt = {
+					const vector<fn_filter> fmt = {
 						fn_filter("json", "JSON") ,
 						fn_filter("*", "All")
 					};
