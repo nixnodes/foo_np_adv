@@ -11,7 +11,7 @@ Only tested on 1.4 so far.
 * Write delay
 * Write on exit
 * Asynchronous writes
-* Import/export configuration
+* Import/export configuration in JSON format
 * Output to clipboard
 * Character encoding
   - [ANSI](https://en.wikipedia.org/wiki/Windows_code_page#ANSI_code_page)
