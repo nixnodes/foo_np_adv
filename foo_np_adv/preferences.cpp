@@ -70,7 +70,8 @@ void CNPAPreferences::OnChangeDefault(UINT, int, CWindow)
 }
 
 void CNPAPreferences::ResetToUnselectedState()
-{	
+{
+	m_curIndex = -1;
 	uSetDlgItemText(*this, IDC_COMBO1, "");
 	uSetDlgItemText(*this, IDC_FILENAME, "");
 	uSetDlgItemText(*this, IDC_PATTERN, "");
