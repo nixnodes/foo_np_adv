@@ -4,6 +4,13 @@
 #include "events.h"
 #include "prefs_instance.h"
 
+#include <vector>
+
+typedef struct fn_filter_s {
+	pfc::string8 ext, desc;
+	fn_filter_s(pfc::string8 p_ext, pfc::string8 p_desc) : ext(p_ext), desc(p_desc) {}
+}fn_filter;
+
 class CNPAPreferences : public CDialogImpl<CNPAPreferences>,
 	public preferences_page_instance,
 	private CEventsBase {
@@ -74,6 +81,15 @@ private:
 	void ResetToDefault();
 	bool HasComboString(CString &str);
 	void ComboInstanceSelect(int index);
+	void config_export(pfc::string8 &fn);
+	void config_import(pfc::string8 &fn);
+
+	bool file_dialog(int mode, pfc::string8 &out, std::vector<fn_filter> &filter);
+
+	enum {
+		FN_DIALOG_SAVE = 0,
+		FN_DIALOG_OPEN
+	};
 
 	void ResetFlags()
 	{

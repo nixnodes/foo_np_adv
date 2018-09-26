@@ -1,5 +1,9 @@
 #include "stdafx.h"
 
+#include <fstream>
+
+using namespace std;
+
 static const GUID cfg_instance_list_guid =
 { 0xAAD2BD90,0xAECA,0x42AA,{0x8B, 0x9D, 0x5A, 0x4B, 0xD9, 0x64, 0xB2, 0x82} };
 
@@ -18,7 +22,7 @@ BOOL CNPAPreferences::OnInitDialog(CWindow, LPARAM)
 	m_ButtonRemoveInstance = GetDlgItem(IDC_BUTTON2);
 	m_ButtonRenameInstance = GetDlgItem(IDC_BUTTON4);
 	m_ButtonFileChooser = GetDlgItem(IDC_BUTTON3);
-	m_ButtonEvent = GetDlgItem(IDC_CONTEXTMENU);
+	m_ButtonEvent = GetDlgItem(IDC_CONTEXTMENU_EVENTS);
 	m_EditDelay = GetDlgItem(IDC_DELAY);
 	m_CheckBoxDelay = GetDlgItem(IDC_CHECK3);
 	m_WinDelaySpin = GetDlgItem(IDC_SPIN1);
@@ -44,10 +48,6 @@ BOOL CNPAPreferences::OnInitDialog(CWindow, LPARAM)
 
 	PopulateContextList();
 
-	if (m_ComboBoxInstance.GetCount() > 0) {
-		ComboInstanceSelect(0);
-	}
-
 	return FALSE;
 }
 
@@ -58,6 +58,10 @@ void CNPAPreferences::PopulateContextList()
 		CA2T w_name(item.name.c_str());
 		m_ComboBoxInstance.AddString(w_name);
 	}
+
+	if (m_ComboBoxInstance.GetCount() > 0) {
+		ComboInstanceSelect(0);
+	}
 }
 
 void CNPAPreferences::OnChangeDefault(UINT, int, CWindow)
@@ -66,7 +70,7 @@ void CNPAPreferences::OnChangeDefault(UINT, int, CWindow)
 }
 
 void CNPAPreferences::ResetToUnselectedState()
-{
+{	
 	uSetDlgItemText(*this, IDC_COMBO1, "");
 	uSetDlgItemText(*this, IDC_FILENAME, "");
 	uSetDlgItemText(*this, IDC_PATTERN, "");
@@ -236,13 +240,17 @@ void CNPAPreferences::OnBnClickedRemove(UINT, int, CWindow)
 		return;
 	}
 
+	pfc::string8 abc;
+
+	abc << "1:: " << m_curIndex << " ::";
 	instance_item &item = g_cfg_instance_list.get_item(m_curIndex);
-
+	abc << "2:: " << m_curIndex << " ::";
 	g_cfg_instance_list.remove_by_idx(m_curIndex);
+	abc << "3:: " << m_curIndex << " ::";
 	m_ComboBoxInstance.DeleteString(m_curIndex);
-
+	abc << "4:: " << m_curIndex << " ::";
 	IEvents::RemoveInstance(item.name);
-
+	abc << "5:: " << m_curIndex << " ::";
 	if (m_ComboBoxInstance.GetCount() > 0) {
 		ComboInstanceSelect(max(m_ComboBoxInstance.GetCount() - 1, 0));
 	}
@@ -367,38 +375,72 @@ void CNPAPreferences::OnCheckBoxClipboardClick(UINT, int, CWindow) {
 	OnChanged();
 }
 
-void CNPAPreferences::OnBnClickedFileChooser(UINT, int, CWindow)
-{
-	OPENFILENAME ofn;
+bool CNPAPreferences::file_dialog(int mode, pfc::string8 &out, vector<fn_filter> &filter) {
 	LPWSTR szFile = (LPWSTR)malloc(MAX_PATH);
 
+	OPENFILENAME ofn;
 	ZeroMemory(szFile, sizeof(szFile));
 	ZeroMemory(&ofn, sizeof(ofn));
 	ofn.lStructSize = sizeof(ofn);
 	ofn.hwndOwner = *this;
 	ofn.lpstrFile = szFile;
 	ofn.nMaxFile = MAX_PATH;
-	ofn.lpstrFilter = _T("Text\0*.txt\0All\0*.*\0");
+	CString szFilter;
+
+	for (auto const& v : filter) {
+		pfc::string8 s = v.desc;
+		s << "|*." << v.ext << "|";
+		szFilter += CA2CT(s);
+	}
+	szFilter += "|";
+	szFilter.Replace('|', '\0');
+	ofn.lpstrFilter = (LPCWSTR)szFilter;
 	ofn.lpstrDefExt = (LPCWSTR)NULL;
-	ofn.nFilterIndex = 1;
+	ofn.nFilterIndex = min(filter.size(), 1);
 	ofn.lpstrInitialDir = NULL;
-	ofn.Flags = OFN_PATHMUSTEXIST | OFN_EXPLORER;
+	ofn.Flags = OFN_EXPLORER;
 
+	bool res;
 
-	if (GetSaveFileName(&ofn)) {
-		pfc::string8 fn = pfc::string8(CT2CA(szFile));
+	if (mode == FN_DIALOG_OPEN) {
+		ofn.Flags |= (OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST);
+		res = GetOpenFileName(&ofn);
+	}
+	else {
+		res = GetSaveFileName(&ofn);
+	}
+
+	if (res) {
+		pfc::string8 fn = CT2CA(szFile);
 
 		if (ofn.nFileExtension == 0) {
-			if (ofn.nFilterIndex == 1) {
-				fn << ".txt";
+			if (ofn.nFilterIndex > 0 && ofn.nFilterIndex <= filter.size()) {
+				fn_filter &f = filter[ofn.nFilterIndex - 1];
+				if (f.ext != pfc::string8("*")) {
+					fn << "." << f.ext;
+				}
 			}
 		}
 
-		uSetDlgItemText(*this, IDC_FILENAME, fn);
-		OnChanged();
+		out = fn;
 	}
 
 	free(szFile);
+	return res;
+}
+
+void CNPAPreferences::OnBnClickedFileChooser(UINT, int, CWindow)
+{
+	pfc::string8 fn;
+	vector<fn_filter> fmt = {
+		fn_filter("txt", "Text") ,
+		fn_filter("*", "All")
+	};
+
+	if (file_dialog(FN_DIALOG_SAVE, fn, fmt)) {
+		uSetDlgItemText(*this, IDC_FILENAME, fn);
+		OnChanged();
+	}
 }
 
 void CNPAPreferences::OnEditPatternChange(UINT, int, CWindow)
@@ -414,19 +456,80 @@ void CNPAPreferences::OnEditDelayChange(UINT, int, CWindow) {
 	OnChanged();
 }
 
+void CNPAPreferences::config_export(pfc::string8 &fn) {
+	try {
+		Json::Value root;
+		for (t_size i = 0; i < g_cfg_instance_list.get_count(); i++) {
+			instance_item &item = g_cfg_instance_list.get_item(i);
+			root.append(item.to_json());
+		}
+
+		fstream fs(fn, ios::out | ios::trunc | ifstream::binary);
+		fs << root;
+		fs.close();
+	}
+	catch (exception const & e) {
+		popup_message::g_complain("Export failed", e);
+	}
+}
+
+void CNPAPreferences::config_import(pfc::string8 &fn) {
+	Json::Value root;
+	try {
+		fstream fs(fn, ios::in | ifstream::binary);
+		fs >> root;
+		fs.close();
+	}
+	catch (exception const & e) {
+		popup_message::g_complain("Import failed", e);
+		return;
+	}
+
+	vector<instance_item> items;
+
+	try {
+		for (Json::ArrayIndex i = 0; i < root.size(); i++) {
+			instance_item item(root[i]);
+			items.push_back(item);
+		}
+	}
+	catch (exception const & e) {
+		popup_message::g_complain("Importing items failed", e);
+		return;
+	}
+
+	if (items.size() == 0) {
+		return;
+	}
+
+	m_ComboBoxInstance.ResetContent();
+	IEvents::Clear();
+	g_cfg_instance_list.remove_all();
+	
+	for (const auto &item : items) {
+		g_cfg_instance_list.add_item(item);
+		IEvents::UpdateInstance(&item);
+		m_ComboBoxInstance.AddString(CA2CT(item.name));
+	}
+
+	ComboInstanceSelect(0);
+
+}
+
 void CNPAPreferences::OnContextMenu(CWindow wnd, CPoint point) {
 	try {
-		if (wnd == GetDlgItem(IDC_CONTEXTMENU)) {
-			if (point == CPoint(-1, -1)) {
-				CRect rc;
-				WIN32_OP(wnd.GetWindowRect(&rc));
-				point = rc.CenterPoint();
-			}
+		if (point == CPoint(-1, -1)) {
+			CRect rc;
+			WIN32_OP(wnd.GetWindowRect(&rc));
+			point = rc.CenterPoint();
+		}
 
-			CMenuDescriptionHybrid menudesc(*this);
-			CMenu menu;
+		CMenuDescriptionHybrid menudesc(*this);
+		CMenu menu;
 
-			WIN32_OP(menu.CreatePopupMenu());
+		WIN32_OP(menu.CreatePopupMenu());
+
+		if (wnd == GetDlgItem(IDC_CONTEXTMENU_EVENTS)) {
 
 			for (int i = 0; i < EVENT_COUNT; i++) {
 				CA2T w(IEvents::EventToString(i));
@@ -446,8 +549,41 @@ void CNPAPreferences::OnContextMenu(CWindow wnd, CPoint point) {
 				OnChanged();
 			}
 		}
+		else if (wnd == GetDlgItem(IDC_CONTEXT_CONFIG)) {
+			enum {
+				ID_IMPORT = 1,
+				ID_EXPORT,
+			};
+
+			menu.AppendMenu(MF_STRING, ID_IMPORT, _T("Import"));
+			menu.AppendMenu(MF_STRING, ID_EXPORT, _T("Export"));
+
+			int cmd = menu.TrackPopupMenu(TPM_RIGHTBUTTON | TPM_NONOTIFY | TPM_RETURNCMD, point.x, point.y, menudesc, 0);
+			if (cmd > 0) {
+				pfc::string8 fn;
+				if (cmd == ID_IMPORT) {
+					vector<fn_filter> fmt = {
+						fn_filter("json", "JSON") ,
+						fn_filter("*", "All")
+					};
+					if (file_dialog(FN_DIALOG_OPEN, fn, fmt)) {
+						config_import(fn);
+					}
+				}
+				else if (cmd == ID_EXPORT) {
+					pfc::string8 fn;
+					vector<fn_filter> fmt = {
+						fn_filter("json", "JSON") ,
+						fn_filter("*", "All")
+					};
+					if (file_dialog(FN_DIALOG_SAVE, fn, fmt)) {
+						config_export(fn);
+					}
+				}
+			}
+		}
 	}
-	catch (std::exception const & e) {
+	catch (exception const & e) {
 		console::complain("Context menu failure", e);
 	}
 }

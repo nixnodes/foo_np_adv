@@ -118,6 +118,7 @@
   <ItemGroup>
     <ClCompile Include="datetime.cpp" />
     <ClCompile Include="initquit.cpp" />
+    <ClCompile Include="jsoncpp.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PCH.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -130,6 +131,8 @@
   <ItemGroup>
     <ClInclude Include="datetime.h" />
     <ClInclude Include="events.h" />
+    <ClInclude Include="json\json-forwards.h" />
+    <ClInclude Include="json\json.h" />
     <ClInclude Include="prefs_instance.h" />
     <ClInclude Include="event_enums.h" />
     <ClInclude Include="preferences.h" />

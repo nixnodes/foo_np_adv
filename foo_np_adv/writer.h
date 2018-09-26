@@ -14,9 +14,6 @@
 #define F_WRITER_APPEND		(uint32_t) 0x00000001
 #define F_WRITER_ABORT		(uint32_t) 0x00000002
 
-using namespace std;
-using namespace chrono;
-
 typedef struct write_job_s {
 	pfc::string8 file;
 	pfc::string8 data;
@@ -75,9 +72,9 @@ public:
 	}
 
 	static void WriteAsync(const write_job *j, long long delay = 0) {
-		thread([](const write_job j, CWriter *c, long long t) {
-			unique_lock<mutex> lk(IWriter::cvq_mutex);
-			IWriter::cv_quit.wait_for(lk, chrono::milliseconds(t),
+		std::thread([](const write_job j, CWriter *c, long long t) {
+			std::unique_lock<std::mutex> lk(IWriter::cvq_mutex);
+			IWriter::cv_quit.wait_for(lk, std::chrono::milliseconds(t),
 				[] {return IWriter::p_Destroy == 1; }
 			);
 			c->QueueWrite(&j);

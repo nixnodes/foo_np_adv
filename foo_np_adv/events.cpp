@@ -3,7 +3,7 @@
 CEvents *IEvents::m_Events = nullptr;
 static std::map<pfc::string8, instance_state> c_instst;
 
-event_item CEvents::UpdateInstance(instance_item *item)
+event_item CEvents::UpdateInstance(const instance_item *item)
 {
 	RemoveInstance(item->name);
 
@@ -32,6 +32,12 @@ void CEvents::RemoveInstance(pfc::string8 name) {
 
 	if (c_instst.count(name) > 0) {
 		c_instst.erase(name);
+	}
+}
+
+void CEvents::Clear() {
+	for (uint32_t i = 0; i < EVENT_COUNT; i++) {
+		m_instancemap[i].clear();
 	}
 }
 

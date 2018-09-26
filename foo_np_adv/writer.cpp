@@ -24,6 +24,8 @@ locale CWriter::lmap[ENCODING_COUNT] = {
 		new codecvt_utf16<wchar_t, 0x10ffff, (codecvt_mode)(generate_header | little_endian)>)
 };
 
+using namespace std;
+using namespace chrono;
 
 void CWriter::worker()
 {
@@ -61,8 +63,7 @@ void CWriter::Write(const write_job *j) {
 		}
 
 		if (j->encoding == ENCODING_ANSI) {
-			fstream fs;
-			fs.open(j->file, flags);
+			fstream fs(j->file, flags);
 			fs << unicode2ansi(widen(j->data));
 			fs.close();
 		}

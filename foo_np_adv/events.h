@@ -40,7 +40,7 @@ typedef struct event_item_s {
 	instance_item item;
 	titleformat_object::ptr m_script;
 
-	event_item_s(instance_item *p_item) {
+	event_item_s(const instance_item *p_item) {
 		item = *p_item;
 		static_api_ptr_t<titleformat_compiler>()->compile_safe_ex(m_script, p_item->format_string);
 	}
@@ -121,12 +121,12 @@ private:
 class CEvents : private CEventsBase {
 public:
 
-	event_item UpdateInstance(instance_item *item);
+	event_item UpdateInstance(const instance_item *item);
 	void RemoveInstance(pfc::string8 name);
+	void Clear();
 private:
 
 	virtual void event_update(uint32_t event);
-
 	std::map<pfc::string8, event_item> m_instancemap[EVENT_COUNT];
 };
 
@@ -145,7 +145,7 @@ public:
 		}
 	}
 
-	static event_item UpdateInstance(instance_item *item) {
+	static event_item UpdateInstance(const instance_item *item) {
 		return m_Events->UpdateInstance(item);
 	}
 
@@ -171,6 +171,10 @@ public:
 		else {
 			return MSG_EVENT_UNKNOWN;
 		}
+	}
+
+	static void Clear() {
+		m_Events->Clear();
 	}
 
 private:

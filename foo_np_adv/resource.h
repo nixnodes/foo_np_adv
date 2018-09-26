@@ -17,7 +17,7 @@
 #define IDC_SLIDER1                     1012
 #define IDC_PATTERN                     1012
 #define IDC_PREVIEW                     1013
-#define IDC_CONTEXTMENU                 1014
+#define IDC_CONTEXTMENU_EVENTS          1014
 #define IDC_BUTTON3                     1015
 #define IDC_CHECK3                      1016
 #define IDC_CHECK5                      1017
@@ -29,6 +29,8 @@
 #define IDC_STATIC5                     1022
 #define IDC_CHECK6                      1023
 #define IDC_BUTTON4                     1024
+#define IDC_BUTTON6                     1026
+#define IDC_CONTEXT_CONFIG              1026
 
 // Next default values for new objects
 // 
