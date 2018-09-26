@@ -55,7 +55,7 @@ void CNPAPreferences::PopulateContextList()
 {
 	for (t_size i = 0; i < g_cfg_instance_list.get_count(); i++) {
 		instance_item &item = g_cfg_instance_list.get_item(i);
-		CA2T w_name(item.name.c_str());
+		CA2CT w_name(item.name.c_str());
 		m_ComboBoxInstance.AddString(w_name);
 	}
 
@@ -565,7 +565,7 @@ void CNPAPreferences::OnContextMenu(CWindow wnd, CPoint point) {
 		if (wnd == GetDlgItem(IDC_CONTEXTMENU_EVENTS)) {
 
 			for (int i = 0; i < EVENT_COUNT; i++) {
-				CA2T w(IEvents::EventToString(i));
+				CA2CT w(IEvents::EventToString(i));
 				UINT flags = MF_STRING;
 				if (event_flags[i]) {
 					flags |= MF_CHECKED;

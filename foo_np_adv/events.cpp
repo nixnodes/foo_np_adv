@@ -92,9 +92,7 @@ void CEvents::event_update(uint32_t event) {
 bool titleformat_hook_glob::process_field(titleformat_text_out * p_out, const char * p_name, t_size p_name_length, bool & p_found_flag)
 {
 	if (pfc::stricmp_ascii_ex(p_name, p_name_length, "volume", pfc::infinite_size) == 0) {
-		pfc::string8 s;
-		s << m_playback_control->get_volume();
-		p_out->write(titleformat_inputtypes::unknown, s);
+		p_out->write_int(titleformat_inputtypes::unknown, (t_int64)m_playback_control->get_volume());
 		TR_RETURN(true)
 	}
 	else if (pfc::stricmp_ascii_ex(p_name, p_name_length, "datetime", pfc::infinite_size) == 0) {
