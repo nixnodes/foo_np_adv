@@ -38,8 +38,8 @@ public:
 		t->join();
 	}
 
-	void QueueWrite(const write_job *j) { q.push(*j); }
-	static void Write(const write_job *j);
+	void QueueWrite(const write_job &j) { q.push(j); }
+	static void Write(const write_job &j);
 
 private:
 	void worker();
@@ -67,18 +67,18 @@ public:
 		}
 	}
 
-	static void Write(const write_job *j) {
+	static void Write(const write_job &j) {
 		m_Writer->QueueWrite(j);
 	}
 
-	static void WriteAsync(const write_job *j, long long delay = 0) {
+	static void WriteAsync(const write_job &j, long long delay = 0) {
 		std::thread([](const write_job j, CWriter *c, long long t) {
 			std::unique_lock<std::mutex> lk(IWriter::cvq_mutex);
 			IWriter::cv_quit.wait_for(lk, std::chrono::milliseconds(t),
 				[] {return IWriter::p_Destroy == 1; }
 			);
-			c->QueueWrite(&j);
-		}, *j, m_Writer, delay).detach();
+			c->QueueWrite(j);
+		}, j, m_Writer, delay).detach();
 	}
 private:
 	static CWriter *m_Writer;

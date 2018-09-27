@@ -239,17 +239,11 @@ void CNPAPreferences::OnBnClickedRemove(UINT, int, CWindow)
 		return;
 	}
 
-	pfc::string8 abc;
-
-	abc << "1:: " << m_curIndex << " ::";
 	instance_item &item = g_cfg_instance_list.get_item(m_curIndex);
-	abc << "2:: " << m_curIndex << " ::";
 	g_cfg_instance_list.remove_by_idx(m_curIndex);
-	abc << "3:: " << m_curIndex << " ::";
 	m_ComboBoxInstance.DeleteString(m_curIndex);
-	abc << "4:: " << m_curIndex << " ::";
 	IEvents::RemoveInstance(item.name);
-	abc << "5:: " << m_curIndex << " ::";
+
 	if (m_ComboBoxInstance.GetCount() > 0) {
 		ComboInstanceSelect(max(m_ComboBoxInstance.GetCount() - 1, 0));
 	}
@@ -276,7 +270,7 @@ void CNPAPreferences::OnBnClickedRename(UINT, int, CWindow)
 	item.name = pfc::string8(CT2CA(str));
 	g_cfg_instance_list.replace_item(m_curIndex, item);
 
-	IEvents::UpdateInstance(&item);
+	IEvents::UpdateInstance(item);
 
 	m_ComboBoxInstance.DeleteString(m_curIndex);
 	m_ComboBoxInstance.InsertString(m_curIndex, str);
@@ -385,7 +379,6 @@ bool CNPAPreferences::file_dialog(int mode, pfc::string8 &out, const vector<fn_f
 	ofn.lpstrFile = szFile;
 	ofn.nMaxFile = MAX_PATH;
 	CString szFilter;
-
 	for (auto const& v : filter) {
 		pfc::string8 s = v.desc;
 		s << "|*." << v.ext << "|";
@@ -400,7 +393,6 @@ bool CNPAPreferences::file_dialog(int mode, pfc::string8 &out, const vector<fn_f
 	ofn.Flags = OFN_EXPLORER;
 
 	bool res;
-
 	if (mode == FN_DIALOG_OPEN) {
 		ofn.Flags |= (OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST);
 		res = GetOpenFileName(&ofn);
@@ -411,7 +403,6 @@ bool CNPAPreferences::file_dialog(int mode, pfc::string8 &out, const vector<fn_f
 
 	if (res) {
 		pfc::string8 fn = CT2CA(szFile);
-
 		if (ofn.nFileExtension == 0) {
 			if (ofn.nFilterIndex > 0 && ofn.nFilterIndex <= filter.size()) {
 				const fn_filter &f = filter[ofn.nFilterIndex - 1];
@@ -420,7 +411,6 @@ bool CNPAPreferences::file_dialog(int mode, pfc::string8 &out, const vector<fn_f
 				}
 			}
 		}
-
 		out = fn;
 	}
 
@@ -456,10 +446,10 @@ void CNPAPreferences::OnEditDelayChange(UINT, int, CWindow) {
 }
 
 void CNPAPreferences::config_export(pfc::string8 &fn) {
+	if (g_cfg_instance_list.get_count() == 0) {
+		return;
+	}
 	try {
-		if (g_cfg_instance_list.get_count() == 0) {
-			return;
-		}
 		Json::Value root;
 		for (t_size i = 0; i < g_cfg_instance_list.get_count(); i++) {
 			instance_item &item = g_cfg_instance_list.get_item(i);
@@ -475,7 +465,7 @@ void CNPAPreferences::config_export(pfc::string8 &fn) {
 	}
 }
 
-static t_size find_instance(const pfc::string8 &name, instance_item &out, t_size &index) {
+static bool find_instance(const pfc::string8 &name, instance_item &out, t_size &index) {
 	for (t_size i = 0; i < g_cfg_instance_list.get_count(); i++) {
 		const instance_item &item = g_cfg_instance_list.get_item(i);
 		if (item.name == name) {
@@ -516,13 +506,7 @@ void CNPAPreferences::config_import(pfc::string8 &fn) {
 		return;
 	}
 
-	bool wasempty;
-	if (m_ComboBoxInstance.GetCount() == 0) {
-		wasempty = true;
-	}
-	else {
-		wasempty = false;
-	}
+	bool wasempty = m_curIndex < 0 ? true : false;
 
 	console::info("NPA: Starting import");
 	pfc::string8 s;
@@ -531,7 +515,7 @@ void CNPAPreferences::config_import(pfc::string8 &fn) {
 		t_size index;
 		if (find_instance(item.name, ex, index)) {
 			console::info(s << "NPA: Updating instance '" << item.name << "'");
-			g_cfg_instance_list.replace_item(index, ex);
+			g_cfg_instance_list.replace_item(index, item);
 		}
 		else {
 			console::info(s << "NPA: Adding instance: '" << item.name << "'");
@@ -539,12 +523,15 @@ void CNPAPreferences::config_import(pfc::string8 &fn) {
 			m_ComboBoxInstance.AddString(CA2CT(item.name));
 		}
 		s.reset();
-		IEvents::UpdateInstance(&item);
+		IEvents::UpdateInstance(item);
 	}
 	console::info("NPA: Import done");
 
 	if (wasempty) {
 		ComboInstanceSelect(0);
+	}
+	else {
+		ComboInstanceSelect(m_curIndex);
 	}
 
 }
@@ -563,7 +550,6 @@ void CNPAPreferences::OnContextMenu(CWindow wnd, CPoint point) {
 		WIN32_OP(menu.CreatePopupMenu());
 
 		if (wnd == GetDlgItem(IDC_CONTEXTMENU_EVENTS)) {
-
 			for (int i = 0; i < EVENT_COUNT; i++) {
 				CA2CT w(IEvents::EventToString(i));
 				UINT flags = MF_STRING;
@@ -589,8 +575,10 @@ void CNPAPreferences::OnContextMenu(CWindow wnd, CPoint point) {
 			};
 
 			menu.AppendMenu(MF_STRING, ID_IMPORT, _T("Import"));
+			menudesc.Set(ID_IMPORT, "Import configuration");
 			if (g_cfg_instance_list.get_count() > 0) {
 				menu.AppendMenu(MF_STRING, ID_EXPORT, _T("Export"));
+				menudesc.Set(ID_EXPORT, "Export configuration");
 			}
 
 			int cmd = menu.TrackPopupMenu(TPM_RIGHTBUTTON | TPM_NONOTIFY | TPM_RETURNCMD, point.x, point.y, menudesc, 0);
@@ -646,7 +634,6 @@ void CNPAPreferences::apply()
 	instance_item item = g_cfg_instance_list.get_item(m_curIndex);
 
 	pfc::string8 str;
-
 	uGetDlgItemText(*this, IDC_FILENAME, str);
 	if (m_CheckBoxWriteToFile.IsChecked() && str.length() == 0) {
 		popup_message::g_complain("Set a file path");
@@ -654,7 +641,6 @@ void CNPAPreferences::apply()
 		return;
 	}
 	item.filename = str;
-
 	uGetDlgItemText(*this, IDC_PATTERN, str);
 	item.format_string = str;
 	uGetDlgItemText(*this, IDC_ON_EXIT, str);
@@ -673,7 +659,7 @@ void CNPAPreferences::apply()
 	}
 
 	g_cfg_instance_list.replace_item(m_curIndex, item);
-	IEvents::UpdateInstance(&item);
+	IEvents::UpdateInstance(item);
 
 	OnChanged();
 }

@@ -35,11 +35,11 @@ void CWriter::worker()
 		if (j.flags & F_WRITER_ABORT) {
 			break;
 		}
-		Write(&j);
+		Write(j);
 	}
 }
 
-wstring widen(pfc::string8 utf8) {
+wstring widen(const pfc::string8 &utf8) {
 	wstring_convert<codecvt_utf8<wchar_t>, wchar_t> convert;
 	return convert.from_bytes(utf8);
 }
@@ -52,26 +52,26 @@ string unicode2ansi(const wstring &wstr)
 	return strTo;
 }
 
-void CWriter::Write(const write_job *j) {
+void CWriter::Write(const write_job &j) {
 	try {
 		int flags = ios::out;
-		if (j->flags & F_WRITER_APPEND) {
+		if (j.flags & F_WRITER_APPEND) {
 			flags |= ios::app;
 		}
 		else {
 			flags |= ios::trunc;
 		}
 
-		if (j->encoding == ENCODING_ANSI) {
-			fstream fs(j->file, flags);
-			fs << unicode2ansi(widen(j->data));
+		if (j.encoding == ENCODING_ANSI) {
+			fstream fs(j.file, flags);
+			fs << unicode2ansi(widen(j.data));
 			fs.close();
 		}
 		else {
 			wfstream fs;
-			fs.imbue(CWriter::lmap[j->encoding]);
-			fs.open(j->file, flags);
-			fs << widen(j->data);
+			fs.imbue(CWriter::lmap[j.encoding]);
+			fs.open(j.file, flags);
+			fs << widen(j.data);
 			fs.close();
 		}
 	}

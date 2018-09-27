@@ -3,24 +3,24 @@
 CEvents *IEvents::m_Events = nullptr;
 static std::map<pfc::string8, instance_state> c_instst;
 
-event_item CEvents::UpdateInstance(const instance_item *item)
+event_item CEvents::UpdateInstance(const instance_item &item)
 {
-	RemoveInstance(item->name);
+	RemoveInstance(item.name);
 
 	event_item evitem(item);
 
 	for (uint32_t i = 0; i < EVENT_COUNT; i++) {
-		if (item->events[i] == true) {
-			m_instancemap[i][item->name] = evitem;
+		if (item.events[i] == true) {
+			m_instancemap[i][item.name] = evitem;
 		}
 	}
 
-	c_instst[item->name] = instance_state();
+	c_instst[item.name] = instance_state();
 
 	return evitem;
 }
 
-void CEvents::RemoveInstance(pfc::string8 name) {
+void CEvents::RemoveInstance(const pfc::string8 &name) {
 	for (uint32_t i = 0; i < EVENT_COUNT; i++) {
 		for (const auto &p : m_instancemap[i]) {
 			if (name == p.first) {
@@ -44,8 +44,7 @@ void CEvents::Clear() {
 void CEvents::event_update(uint32_t event) {
 	for (const auto &p : m_instancemap[event]) {
 		event_item &ievent = (event_item&)p.second;
-		titleformat_object::ptr m_script = ievent.m_script;
-		pfc::string8 state = format_title(m_script);
+		pfc::string8 state = format_title(ievent.m_script);
 
 		const instance_item &item = ievent.item;
 
@@ -80,10 +79,10 @@ void CEvents::event_update(uint32_t event) {
 
 			write_job j(item.filename, state, item.encoding, flags);
 			if (item.enable_delay) {
-				IWriter::WriteAsync(&j, item.delay);
+				IWriter::WriteAsync(j, item.delay);
 			}
 			else {
-				IWriter::Write(&j);
+				IWriter::Write(j);
 			}
 		}
 	}
