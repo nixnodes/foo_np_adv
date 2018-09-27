@@ -36,7 +36,7 @@ Only tested on 1.4 so far.
  
 ## Examples
 #### Basic now playing
-Format: `$if(%isplaying%,$if(%ispaused%,|| ,|> )$if($meta_test(artist,title),%artist% - %title% ,%title%),)`  
+Format: `$if(%isplaying%,$if(%ispaused%,|| ,|> )$if($meta_test(artist,title),%artist% - %title% ,%title%))`  
 Events: New track, Playback stop, Playback pause  
 Output:  
   - Playing: `|> Muzzy - Junction Seven`
