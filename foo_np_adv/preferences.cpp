@@ -246,7 +246,7 @@ void CNPAPreferences::OnBnClickedRemove(UINT, int, CWindow)
 	IEvents::RemoveInstance(item.name);
 
 	if (m_ComboBoxInstance.GetCount() > 0) {
-		ComboInstanceSelect(max(m_ComboBoxInstance.GetCount() - 1, 0));
+		ComboInstanceSelect(min(m_curIndex, m_ComboBoxInstance.GetCount() - 1));
 	}
 	else {
 		ResetToUnselectedState();
