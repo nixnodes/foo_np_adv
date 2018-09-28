@@ -3,6 +3,11 @@
 class npa_initquit : public initquit {
 public:
 	void on_init() {
+		IEvents::Initialize();
+		IWriter::Initialize();
+		for (t_size i = 0; i < IConfig::Count(); i++) {
+			IEvents::UpdateInstance(IConfig::Get(i));
+		}
 		console::info(COMMON_NAME " - plugin initialized");
 	}
 	void on_quit() {
@@ -22,21 +27,3 @@ private:
 };
 
 static initquit_factory_t<npa_initquit> g_npainitquit_factory;
-
-class InitHandler : public init_stage_callback {
-public:
-	void on_init_stage(t_uint32 stage) {
-		switch (stage) {
-		case init_stages::before_config_read:;
-			IEvents::Initialize();
-			IWriter::Initialize();
-			break;
-		case init_stages::after_config_read:;
-			for (t_size i = 0; i < IConfig::Count(); i++) {
-				IEvents::UpdateInstance(&IConfig::Get(i));
-			}
-			break;
-		}
-	}
-};
-static service_factory_single_t<InitHandler> initHandler;
