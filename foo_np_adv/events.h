@@ -1,12 +1,9 @@
 #pragma once
 
 #include "prefs_instance.h"
-#include "event_enums.h"
-#include "datetime.h"
 
 #include <map>
 #include <vector>
-#include <string>
 
 static std::map<int, std::vector<pfc::string8>> _evtostr = {
 	{EVENT_PLAYBACK_STARTING, {"Playback start","Trigger when playback starts"}},

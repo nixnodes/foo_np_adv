@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include <fstream>
+#include <algorithm>
 
 using namespace std;
 
@@ -227,8 +228,7 @@ void CNPAPreferences::OnBnClickedAdd(UINT, int, CWindow)
 		return;
 	}
 
-	instance_item item(pfc::string8(CT2CA(str)), "", "", false,
-		false, false, 0, {}, false, "", ENCODING_UTF8, false, false);
+	instance_item item((const char *) CT2CA(str));
 	g_cfg_instance_list.add_item(item);
 	m_ComboBoxInstance.InsertString(m_ComboBoxInstance.GetCount(), str);
 	ComboInstanceSelect(m_ComboBoxInstance.GetCount() - 1);
@@ -270,13 +270,11 @@ void CNPAPreferences::OnBnClickedRename(UINT, int, CWindow)
 	instance_item &item = g_cfg_instance_list.get_item(m_curIndex);
 	item.name = pfc::string8(CT2CA(str));
 	g_cfg_instance_list.replace_item(m_curIndex, item);
-
 	IEvents::UpdateInstance(item);
 
 	m_ComboBoxInstance.DeleteString(m_curIndex);
 	m_ComboBoxInstance.InsertString(m_curIndex, str);
 	OnComboTextChange(0, IDC_COMBO1, m_ComboBoxInstance);
-
 }
 
 bool CNPAPreferences::HasComboString(CString &ls) {

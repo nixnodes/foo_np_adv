@@ -8,7 +8,7 @@
 
 typedef struct fn_filter_s {
 	pfc::string8 ext, desc;
-	fn_filter_s(pfc::string8 p_ext, pfc::string8 p_desc) : ext(p_ext), desc(p_desc) {}
+	fn_filter_s(const char *p_ext,const char *p_desc) : ext(p_ext), desc(p_desc) {}
 }fn_filter;
 
 class CNPAPreferences : public CDialogImpl<CNPAPreferences>,

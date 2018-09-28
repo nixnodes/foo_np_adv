@@ -1,5 +1,6 @@
 #include "stdafx.h"
 
+
 CEvents *IEvents::m_Events = nullptr;
 static std::map<pfc::string8, instance_state> c_instst;
 

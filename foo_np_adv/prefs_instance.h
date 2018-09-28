@@ -1,22 +1,24 @@
 #pragma once
 
 #include "event_enums.h"
+#include "writer_flags.h"
+
 #include "json/json.h"
 
 typedef struct instance_item_s {
 	pfc::string8 name;
 	pfc::string8 filename;
 	pfc::string8 format_string;
-	bool write_to_file;
-	bool log_mode;
-	bool enable_delay;
+	bool write_to_file = false;
+	bool log_mode = false;
+	bool enable_delay = false;
 	uint32_t delay = 0;
 	bool events[EVENT_COUNT];
-	bool on_exit;
+	bool on_exit = false;
 	pfc::string8 on_exit_str;
-	uint8_t encoding;
-	bool changes_only;
-	bool clipboard;
+	uint8_t encoding = ENCODING_UTF8;
+	bool changes_only = false;
+	bool clipboard = false;
 	bool _breserved2 = false;
 	bool _breserved3 = false;
 	bool _breserved4 = false;
@@ -29,43 +31,10 @@ typedef struct instance_item_s {
 	pfc::string8 _sreserved3;
 	pfc::string8 _sreserved4;
 
-	instance_item_s(const char * p_name, const char * p_filename, const char * p_format_string,
-		const bool p_write_to_file, const bool p_log_mode, const bool p_enable_delay, const uint32_t p_delay,
-		const bool(&p_events)[EVENT_COUNT], const bool p_on_exit, const char *p_on_exit_str, const uint8_t p_encoding,
-		const bool p_changes_only, const bool p_clipboard)
-		: name(p_name), filename(p_filename), format_string(p_format_string), log_mode(p_log_mode),
-		enable_delay(p_enable_delay), delay(p_delay), on_exit(p_on_exit), on_exit_str(p_on_exit_str),
-		encoding(p_encoding), changes_only(p_changes_only), clipboard(p_clipboard)
-	{
-		for (uint32_t i = 0; i < EVENT_COUNT; i++) {
-			events[i] = p_events[i];
-			pfc::string_formatter str;
-			console::print(str << p_events[i]);
-		}
-	}
-	instance_item_s(const char * p_name, const char * p_filename, const char * p_format_string, const bool p_write_to_file,
-		const bool p_log_mode, const bool p_enable_delay, const uint32_t p_delay, const std::initializer_list <uint32_t> p_events,
-		const bool p_on_exit, const char *p_on_exit_str, const uint8_t p_encoding, const bool p_changes_only,
-		const bool p_clipboard)
-		: name(p_name), filename(p_filename), format_string(p_format_string), log_mode(p_log_mode),
-		enable_delay(p_enable_delay), delay(p_delay), write_to_file(p_write_to_file), on_exit(p_on_exit),
-		on_exit_str(p_on_exit_str), encoding(p_encoding), changes_only(p_changes_only), clipboard(p_clipboard)
-	{
+	instance_item_s(const char *p_name) : name(p_name) {
 		reset_events();
-
-		for (auto f : p_events) {
-			if (f >= EVENT_COUNT) {
-				pfc::string_formatter str;
-				console::info(str << "WARNING: got invalid event during 'instance_item_s' initialization: " << f);
-			}
-			else {
-				events[f] = true;
-			}
-		}
 	}
 	instance_item_s(Json::Value &p_data) {
-		
-		
 		if (!p_data["name"].isString()) {
 			throw std::invalid_argument("'name' expected type string");
 		}
