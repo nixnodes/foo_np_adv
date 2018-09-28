@@ -8,7 +8,7 @@
 
 typedef struct fn_filter_s {
 	pfc::string8 ext, desc;
-	fn_filter_s(const char *p_ext,const char *p_desc) : ext(p_ext), desc(p_desc) {}
+	fn_filter_s(const char *p_ext, const char *p_desc) : ext(p_ext), desc(p_desc) {}
 }fn_filter;
 
 class CNPAPreferences : public CDialogImpl<CNPAPreferences>,
@@ -50,6 +50,7 @@ public:
 		COMMAND_HANDLER_EX(IDC_ON_EXIT, EN_CHANGE, OnChangeDefault)
 		COMMAND_HANDLER_EX(IDC_CHECK5, BN_CLICKED, OnChangeDefault)
 		COMMAND_HANDLER_EX(IDC_CHECK6, BN_CLICKED, OnCheckBoxClipboardClick)
+		COMMAND_HANDLER_EX(IDC_ENABLED, BN_CLICKED, OnChangeDefault)
 		MSG_WM_CONTEXTMENU(OnContextMenu)
 	END_MSG_MAP()
 
@@ -116,6 +117,7 @@ private:
 	CCheckBox m_CheckBoxOnExit;
 	CCheckBox m_CheckBoxChangesOnly;
 	CCheckBox m_CheckBoxClipboard;
+	CCheckBox m_CheckEnabled;
 	CEdit m_EditFilename;
 	CEdit m_EditPattern;
 	CEdit m_EditDelay;
@@ -170,6 +172,11 @@ public:
 	{
 		return m_cfg_objlist->get_item(i);
 	}
+
+	static bool IsEnabled() {
+		return m_cfg_masterswitch->get_value();
+	}
 private:
 	static cfg_objList<instance_item> *m_cfg_objlist;
+	static cfg_bool *m_cfg_masterswitch;
 };

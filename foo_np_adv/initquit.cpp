@@ -1,6 +1,5 @@
 #include "stdafx.h"
 
-
 class npa_initquit : public initquit {
 public:
 	void on_init() {
@@ -10,10 +9,12 @@ public:
 		IEvents::Destroy();
 		IWriter::Destroy();
 
-		for (t_size i = 0; i < IConfig::Count(); i++) {
-			const instance_item item = IConfig::Get(i);
-			if (item.on_exit && item.write_to_file) {
-				CWriter::Write(write_job(item.filename, item.on_exit_str, item.encoding));
+		if (IConfig::IsEnabled()) {
+			for (t_size i = 0; i < IConfig::Count(); i++) {
+				const instance_item &item = IConfig::Get(i);
+				if (item.on_exit && item.write_to_file) {
+					CWriter::Write(write_job(item.filename, item.on_exit_str, item.encoding));
+				}
 			}
 		}
 	}

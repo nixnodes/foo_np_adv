@@ -1,6 +1,5 @@
 #include "stdafx.h"
 
-
 CEvents *IEvents::m_Events = nullptr;
 static std::map<pfc::string8, instance_state> c_instst;
 
@@ -43,6 +42,10 @@ void CEvents::Clear() {
 }
 
 void CEvents::event_update(uint32_t event) {
+	if (!IConfig::IsEnabled()) {
+		return;
+	}
+
 	for (const auto &p : m_instancemap[event]) {
 		event_item &ievent = (event_item&)p.second;
 		pfc::string8 state = format_title(ievent.m_script);

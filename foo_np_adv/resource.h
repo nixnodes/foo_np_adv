@@ -29,6 +29,8 @@
 #define IDC_STATIC5                     1022
 #define IDC_CHECK6                      1023
 #define IDC_BUTTON4                     1024
+#define IDC_CHECK7                      1025
+#define IDC_ENABLED                     1025
 #define IDC_BUTTON6                     1026
 #define IDC_CONTEXT_CONFIG              1026
 

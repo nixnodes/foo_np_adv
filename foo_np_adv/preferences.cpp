@@ -7,9 +7,13 @@ using namespace std;
 
 static const GUID cfg_instance_list_guid =
 { 0xAAD2BD90,0xAECA,0x42AA,{0x8B, 0x9D, 0x5A, 0x4B, 0xD9, 0x64, 0xB2, 0x82} };
+static const GUID guid_cfg_masterswitch =
+{ 0x2130D72F,0x8A53,0x41A5,{0xAE, 0x67, 0xE2, 0x83, 0xD9, 0x2A, 0x7D, 0x43} };
+
+static cfg_bool cfg_masterswitch(guid_cfg_masterswitch, true);
+cfg_bool *IConfig::m_cfg_masterswitch = &cfg_masterswitch;
 
 static cfg_objList<instance_item> g_cfg_instance_list(cfg_instance_list_guid);
-
 cfg_objList<instance_item> *IConfig::m_cfg_objlist = &g_cfg_instance_list;
 
 BOOL CNPAPreferences::OnInitDialog(CWindow, LPARAM)
@@ -34,6 +38,9 @@ BOOL CNPAPreferences::OnInitDialog(CWindow, LPARAM)
 	m_StaticEncoding = GetDlgItem(IDC_STATIC5);
 	m_CheckBoxChangesOnly = GetDlgItem(IDC_CHECK5);
 	m_CheckBoxClipboard = GetDlgItem(IDC_CHECK6);
+	m_CheckEnabled = GetDlgItem(IDC_ENABLED);
+
+	m_CheckEnabled.SetCheck(cfg_masterswitch ? 1 : 0);
 
 	SendMessage(m_WinDelaySpin, UDM_SETBUDDY, (WPARAM)(HWND)m_EditDelay, 0);
 	SendMessage(m_WinDelaySpin, UDM_SETRANGE32, 0, CNPAPreferences::idc_delay_hardlimit);
@@ -228,8 +235,7 @@ void CNPAPreferences::OnBnClickedAdd(UINT, int, CWindow)
 		return;
 	}
 
-	instance_item item((const char *) CT2CA(str));
-	g_cfg_instance_list.add_item(item);
+	g_cfg_instance_list.add_item(instance_item((const char *)CT2CA(str)));
 	m_ComboBoxInstance.InsertString(m_ComboBoxInstance.GetCount(), str);
 	ComboInstanceSelect(m_ComboBoxInstance.GetCount() - 1);
 }
@@ -644,6 +650,8 @@ void CNPAPreferences::apply()
 		return;
 	}
 
+	cfg_masterswitch = m_CheckEnabled.IsChecked();
+
 	instance_item item = g_cfg_instance_list.get_item(m_curIndex);
 
 	pfc::string8 str;
@@ -681,6 +689,10 @@ bool CNPAPreferences::HasChanged()
 {
 	if (m_curIndex < 0) {
 		return false;
+	}
+
+	if (m_CheckEnabled.IsChecked() != cfg_masterswitch) {
+		return true;
 	}
 
 	instance_item item = g_cfg_instance_list.get_item(m_curIndex);
