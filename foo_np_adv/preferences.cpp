@@ -23,6 +23,7 @@ BOOL CNPAPreferences::OnInitDialog(CWindow, LPARAM)
 	m_ButtonRenameInstance = GetDlgItem(IDC_BUTTON4);
 	m_ButtonFileChooser = GetDlgItem(IDC_BUTTON3);
 	m_ButtonEvent = GetDlgItem(IDC_CONTEXTMENU_EVENTS);
+	m_ButtonConfig = GetDlgItem(IDC_CONTEXT_CONFIG);
 	m_EditDelay = GetDlgItem(IDC_DELAY);
 	m_CheckBoxDelay = GetDlgItem(IDC_CHECK3);
 	m_WinDelaySpin = GetDlgItem(IDC_SPIN1);
@@ -533,77 +534,91 @@ void CNPAPreferences::config_import(pfc::string8 &fn) {
 	else {
 		ComboInstanceSelect(m_curIndex);
 	}
-
 }
 
-void CNPAPreferences::OnContextMenu(CWindow wnd, CPoint point) {
-	try {
-		if (point == CPoint(-1, -1)) {
-			CRect rc;
-			WIN32_OP(wnd.GetWindowRect(&rc));
-			point = rc.CenterPoint();
+class CContextMenuEvent : public CContextMenuBase {
+public:
+	CContextMenuEvent(CWindow &wnd, CPoint &p_point, CNPAPreferences *p_parent) :
+		CContextMenuBase(wnd, p_point, p_parent) {}
+
+	void popup() {
+		CMenuDescriptionHybrid menudesc(*parent);
+
+		for (int i = 0; i < EVENT_COUNT; i++) {
+			CA2CT w(IEvents::EventToString(i));
+			UINT flags = MF_STRING;
+			if (parent->event_flags[i]) {
+				flags |= MF_CHECKED;
+			}
+			int id = i + 1;
+			menu.AppendMenu(flags, id, w);
+			menudesc.Set(id, IEvents::GetEventDescription(i));
 		}
 
-		CMenuDescriptionHybrid menudesc(*this);
-		CMenu menu;
-
-		WIN32_OP(menu.CreatePopupMenu());
-
-		if (wnd == GetDlgItem(IDC_CONTEXTMENU_EVENTS)) {
-			for (int i = 0; i < EVENT_COUNT; i++) {
-				CA2CT w(IEvents::EventToString(i));
-				UINT flags = MF_STRING;
-				if (event_flags[i]) {
-					flags |= MF_CHECKED;
-				}
-				int id = i + 1;
-				menu.AppendMenu(flags, id, w);
-				menudesc.Set(id, IEvents::GetEventDescription(i));
-			}
-
-			int cmd = menu.TrackPopupMenu(TPM_RIGHTBUTTON | TPM_NONOTIFY | TPM_RETURNCMD, point.x, point.y, menudesc, 0);
-			if (cmd > 0) {
-				int eventid = cmd - 1;
-				event_flags[eventid] = !event_flags[eventid];
-				OnChanged();
-			}
+		int cmd = menu.TrackPopupMenu(TPM_RIGHTBUTTON | TPM_NONOTIFY | TPM_RETURNCMD, point.x, point.y, menudesc, 0);
+		if (cmd > 0 && cmd <= EVENT_COUNT) {
+			int eventid = cmd - 1;
+			parent->event_flags[eventid] = !parent->event_flags[eventid];
+			parent->OnChanged();
 		}
-		else if (wnd == GetDlgItem(IDC_CONTEXT_CONFIG)) {
-			enum {
-				ID_IMPORT = 1,
-				ID_EXPORT,
+	}
+};
+
+class CContextMenuConfig : public CContextMenuBase {
+public:
+	CContextMenuConfig(CWindow &wnd, CPoint &p_point, CNPAPreferences *p_parent) :
+		CContextMenuBase(wnd, p_point, p_parent) {}
+
+	void popup() {
+		CMenuDescriptionHybrid menudesc(*parent);
+
+		enum {
+			ID_IMPORT = 1,
+			ID_EXPORT,
+		};
+
+		menu.AppendMenu(MF_STRING, ID_IMPORT, _T("Import"));
+		menudesc.Set(ID_IMPORT, "Import configuration");
+		if (g_cfg_instance_list.get_count() > 0) {
+			menu.AppendMenu(MF_STRING, ID_EXPORT, _T("Export"));
+			menudesc.Set(ID_EXPORT, "Export configuration");
+		}
+
+		int cmd = menu.TrackPopupMenu(TPM_RIGHTBUTTON | TPM_NONOTIFY | TPM_RETURNCMD, point.x, point.y, menudesc, 0);
+		if (cmd < 1) {
+			return;
+		}
+		pfc::string8 fn;
+		if (cmd == ID_IMPORT) {
+			const vector<fn_filter> fmt = {
+				fn_filter("json", "JSON") ,
+				fn_filter("*", "All")
 			};
-
-			menu.AppendMenu(MF_STRING, ID_IMPORT, _T("Import"));
-			menudesc.Set(ID_IMPORT, "Import configuration");
-			if (g_cfg_instance_list.get_count() > 0) {
-				menu.AppendMenu(MF_STRING, ID_EXPORT, _T("Export"));
-				menudesc.Set(ID_EXPORT, "Export configuration");
+			if (parent->file_dialog(parent->FN_DIALOG_OPEN, fn, fmt)) {
+				parent->config_import(fn);
 			}
-
-			int cmd = menu.TrackPopupMenu(TPM_RIGHTBUTTON | TPM_NONOTIFY | TPM_RETURNCMD, point.x, point.y, menudesc, 0);
-			if (cmd > 0) {
-				pfc::string8 fn;
-				if (cmd == ID_IMPORT) {
-					const vector<fn_filter> fmt = {
-						fn_filter("json", "JSON") ,
-						fn_filter("*", "All")
-					};
-					if (file_dialog(FN_DIALOG_OPEN, fn, fmt)) {
-						config_import(fn);
-					}
-				}
-				else if (cmd == ID_EXPORT) {
-					pfc::string8 fn;
-					vector<fn_filter> fmt = {
-						fn_filter("json", "JSON") ,
-						fn_filter("*", "All")
-					};
-					if (file_dialog(FN_DIALOG_SAVE, fn, fmt)) {
-						config_export(fn);
-					}
-				}
+		}
+		else if (cmd == ID_EXPORT) {
+			pfc::string8 fn;
+			vector<fn_filter> fmt = {
+				fn_filter("json", "JSON") ,
+				fn_filter("*", "All")
+			};
+			if (parent->file_dialog(parent->FN_DIALOG_SAVE, fn, fmt)) {
+				parent->config_export(fn);
 			}
+		}
+	}
+};
+
+void CNPAPreferences::OnContextMenu(CWindow wnd, CPoint point)
+{
+	try {
+		if (wnd == m_ButtonEvent) {
+			CContextMenuEvent(wnd, point, this).popup();
+		}
+		else if (wnd == m_ButtonConfig) {
+			CContextMenuConfig(wnd, point, this).popup();
 		}
 	}
 	catch (exception const & e) {

@@ -52,6 +52,18 @@ public:
 		COMMAND_HANDLER_EX(IDC_CHECK6, BN_CLICKED, OnCheckBoxClipboardClick)
 		MSG_WM_CONTEXTMENU(OnContextMenu)
 	END_MSG_MAP()
+
+	enum {
+		FN_DIALOG_SAVE = 0,
+		FN_DIALOG_OPEN
+	};
+
+	void config_export(pfc::string8 &fn);
+	void config_import(pfc::string8 &fn);
+	bool file_dialog(int mode, pfc::string8 &out, const std::vector<fn_filter> &filter);
+	void OnChanged();
+
+	bool event_flags[EVENT_COUNT];
 private:
 	BOOL OnInitDialog(CWindow, LPARAM);
 	void OnChangeDefault(UINT, int, CWindow);
@@ -71,7 +83,7 @@ private:
 
 	void PatternPreviewUpdate(uint32_t event, bool force = false);
 	bool HasChanged();
-	void OnChanged();
+
 	void PopulateContextList();
 	void SetControlAvailabilityFile();
 	void SetControlAvailabilityDelay();
@@ -81,15 +93,6 @@ private:
 	void ResetToDefault();
 	bool HasComboString(CString &str);
 	void ComboInstanceSelect(int index);
-	void config_export(pfc::string8 &fn);
-	void config_import(pfc::string8 &fn);
-
-	bool file_dialog(int mode, pfc::string8 &out, const std::vector<fn_filter> &filter);
-
-	enum {
-		FN_DIALOG_SAVE = 0,
-		FN_DIALOG_OPEN
-	};
 
 	void ResetFlags()
 	{
@@ -122,16 +125,37 @@ private:
 	CButton m_ButtonEvent;
 	CButton m_ButtonFileChooser;
 	CButton m_ButtonRenameInstance;
+	CButton m_ButtonConfig;
 	CWindow m_WinDelaySpin;
 	CStatic m_StaticEncoding;
 
 	const preferences_page_callback::ptr m_callback;
 	titleformat_object::ptr m_script;
 
-	bool event_flags[EVENT_COUNT];
 	int m_curIndex = -1;
 
 	static const INT idc_delay_hardlimit = 3600000;
+};
+
+class CContextMenuBase {
+public:
+	CContextMenuBase(CWindow &wnd, CPoint &p_point, CNPAPreferences *p_parent) :
+		parent(p_parent), point(p_point) {
+
+		if (point == CPoint(-1, -1)) {
+			CRect rc;
+			WIN32_OP(wnd.GetWindowRect(&rc));
+			point = rc.CenterPoint();
+		}
+
+		WIN32_OP(menu.CreatePopupMenu());
+	};
+
+	virtual void popup() {}
+
+	CMenu menu;
+	CPoint point;
+	CNPAPreferences *parent;
 };
 
 class IConfig {
