@@ -14,9 +14,10 @@ Only tested on 1.4 so far.
 * Import/export configuration in JSON format
 * Output to clipboard
 * Character encoding
-  - [ANSI](https://en.wikipedia.org/wiki/Windows_code_page#ANSI_code_page), [OEM](https://en.wikipedia.org/wiki/Windows_code_page#OEM_code_page)
+  - [ANSI](https://en.wikipedia.org/wiki/Windows_code_page#ANSI_code_page)
   - [UTF-8](https://en.wikipedia.org/wiki/UTF-8) (header optional)
   - [UCS-2](https://en.wikipedia.org/wiki/Universal_Coded_Character_Set) (header optional, big/little endian)
+  - [OEM](https://en.wikipedia.org/wiki/Windows_code_page#OEM_code_page)
   - [MAC](https://en.wikipedia.org/wiki/Code_page#Macintosh_emulation_code_pages_2)
 * Trigger events
   - Playback start/pause/seek
@@ -37,7 +38,7 @@ Only tested on 1.4 so far.
  
 ## Examples
 #### Basic now playing
-Format: `$if(%isplaying%,$if(%ispaused%,|| ,|> )$if($meta_test(artist,title),%artist% - %title% ,%title%))`  
+Format: `$if(%isplaying%,$if(%ispaused%,||,|>) $if($meta_test(artist,title),%artist% - %title% ,%title%))`  
 Events: New track, Playback stop, Playback pause  
 Output:  
   - Playing: `|> Muzzy - Junction Seven`
