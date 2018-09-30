@@ -221,17 +221,19 @@ void CNPAPreferences::OnComboTextChange(UINT, int, CWindow)
 		m_ButtonRenameInstance.EnableWindow(false);
 		return;
 	}
+	else {
+		m_ButtonRemoveInstance.EnableWindow(true);
+	}
 
 	if (HasComboString(str)) {
-		m_ButtonAddInstance.EnableWindow(false);
-		m_ButtonRemoveInstance.EnableWindow(false);
+		m_ButtonAddInstance.EnableWindow(false);		
 		m_ButtonRenameInstance.EnableWindow(false);
 	}
 	else {
 		m_ButtonAddInstance.EnableWindow(true);
-		m_ButtonRemoveInstance.EnableWindow(false);
 		m_ButtonRenameInstance.EnableWindow(true);
 	}
+	
 }
 
 void CNPAPreferences::OnBnClickedAdd(UINT, int, CWindow)
