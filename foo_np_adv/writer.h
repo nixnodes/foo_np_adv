@@ -26,15 +26,15 @@ typedef struct write_job_s {
 class CWriter {
 public:
 	CWriter() {
-		t = new std::thread(std::bind(&CWriter::worker, this));
+		thread = new std::thread(std::bind(&CWriter::worker, this));
 	}
 	~CWriter()
 	{
 		try {
-			q.push(write_job(F_WRITER_ABORT), true);
-			t->join();
+			queue.push(write_job(F_WRITER_ABORT), true);
+			thread->join();
 		}
-		catch (std::exception &) {
+		catch (std::exception const &) {
 			// ignore
 		}
 	}
@@ -45,8 +45,8 @@ public:
 private:
 	void worker();
 
-	std::thread *t;
-	Queue<write_job> q;
+	std::thread *thread;
+	Queue<write_job> queue;
 
 	static std::locale lmap[ENCODING_COUNT];
 };

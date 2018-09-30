@@ -213,7 +213,7 @@ void CNPAPreferences::OnComboTextChange(UINT, int, CWindow)
 {
 	CString str;
 	GetDlgItemText(IDC_COMBO1, str);
-	str = str.MakeLower();
+	str = str.Trim().MakeLower();
 
 	if (str.GetLength() == 0) {
 		m_ButtonAddInstance.EnableWindow(false);
@@ -238,7 +238,7 @@ void CNPAPreferences::OnBnClickedAdd(UINT, int, CWindow)
 {
 	CString str;
 	GetDlgItemText(IDC_COMBO1, str);
-	str = str.MakeLower();
+	str = str.Trim().MakeLower();
 
 	if (HasComboString(str)) {
 		return;
@@ -276,7 +276,7 @@ void CNPAPreferences::OnBnClickedRename(UINT, int, CWindow)
 
 	CString str;
 	GetDlgItemText(IDC_COMBO1, str);
-	str = str.MakeLower();
+	str = str.Trim().MakeLower();
 
 	if (HasComboString(str)) {
 		return;
@@ -297,7 +297,7 @@ bool CNPAPreferences::HasComboString(CString &ls) {
 		CString rs;
 		m_ComboBoxInstance.GetLBText(i, rs);
 
-		if (ls == rs.MakeLower()) {
+		if (ls == rs.Trim().MakeLower()) {
 			return true;
 		}
 	}

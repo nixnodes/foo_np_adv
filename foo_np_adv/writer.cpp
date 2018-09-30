@@ -32,9 +32,9 @@ using namespace std;
 
 void CWriter::worker()
 {
-	while (true)
+	for (;;)
 	{
-		const write_job j = q.pop();
+		const write_job &j = queue.pop();
 		if (j.flags & F_WRITER_ABORT) {
 			break;
 		}
@@ -55,9 +55,15 @@ static string unicode2cp(UINT cp, const wstring &wstr)
 	return strTo;
 }
 
+static void writecp(UINT cp, char flags, const write_job &j) {
+	fstream fs(j.file, flags);
+	fs << unicode2cp(CP_ACP, widen(j.data));
+	fs.close();
+}
+
 void CWriter::Write(const write_job &j)
 {
-	int flags = ios::out;
+	char flags = ios::out;
 	if (j.flags & F_WRITER_APPEND) {
 		flags |= ios::app;
 	}
@@ -67,19 +73,13 @@ void CWriter::Write(const write_job &j)
 
 	try {
 		if (j.encoding == ENCODING_ANSI) {
-			fstream fs(j.file, flags);
-			fs << unicode2cp(CP_ACP, widen(j.data));
-			fs.close();
+			writecp(CP_ACP, flags, j);
 		}
 		else if (j.encoding == ENCODING_OEM) {
-			fstream fs(j.file, flags);
-			fs << unicode2cp(CP_OEMCP, widen(j.data));
-			fs.close();
+			writecp(CP_OEMCP, flags, j);
 		}
 		else if (j.encoding == ENCODING_MAC) {
-			fstream fs(j.file, flags);
-			fs << unicode2cp(CP_MACCP, widen(j.data));
-			fs.close();
+			writecp(CP_MACCP, flags, j);
 		}
 		else {
 			wfstream fs;
@@ -97,9 +97,9 @@ void CWriter::Write(const write_job &j)
 void CWriter::QueueWrite(const write_job &j)
 {
 	try {
-		q.push(j);
+		queue.push(j);
 	}
-	catch (std::exception &e) {
+	catch (exception const &e) {
 		console::complain("NPA: unable to push write job", e);
 	}
 }
