@@ -1,7 +1,6 @@
 #include "stdafx.h"
 
 CEvents *IEvents::m_Events = nullptr;
-static std::map<pfc::string8, instance_state> c_instst;
 
 event_item CEvents::UpdateInstance(const instance_item &item)
 {
@@ -47,7 +46,7 @@ void CEvents::event_update(uint32_t event) {
 	}
 
 	for (const auto &p : m_instancemap[event]) {
-		event_item &ievent = (event_item&)p.second;
+		const event_item &ievent = p.second;
 		pfc::string8 state = format_title(ievent.m_script);
 
 		const instance_item &item = ievent.item;
@@ -65,11 +64,9 @@ void CEvents::event_update(uint32_t event) {
 					continue;
 				}
 			}
-			st.ponce = true;
-			st.last_state = state;
+			st.update(state);
 
 			uint32_t flags;
-
 			if (item.log_mode) {
 				flags = F_WRITER_APPEND;
 				if (state.length() == 0) {

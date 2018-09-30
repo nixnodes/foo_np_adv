@@ -1,11 +1,13 @@
 #include "stdafx.h"
 
+#include <codecvt>
+#include <string>
+
 using namespace std;
 
 condition_variable IWriter::cv_quit;
 mutex IWriter::cvq_mutex;
-atomic<int> IWriter::p_Destroy{ 0 };
-
+atomic<bool> IWriter::p_Destroy{ false };
 CWriter *IWriter::m_Writer = nullptr;
 
 locale CWriter::lmap[ENCODING_COUNT] = {
@@ -25,7 +27,6 @@ locale CWriter::lmap[ENCODING_COUNT] = {
 };
 
 using namespace std;
-using namespace chrono;
 
 void CWriter::worker()
 {
@@ -39,12 +40,12 @@ void CWriter::worker()
 	}
 }
 
-wstring widen(const pfc::string8 &utf8) {
+static wstring widen(const pfc::string8 &utf8) {
 	wstring_convert<codecvt_utf8<wchar_t>, wchar_t> convert;
 	return convert.from_bytes(utf8);
 }
 
-string unicode2ansi(const wstring &wstr)
+static string unicode2ansi(const wstring &wstr)
 {
 	int size_needed = WideCharToMultiByte(CP_ACP, 0, &wstr[0], -1, NULL, 0, NULL, NULL);
 	string strTo(size_needed, 0);
@@ -52,16 +53,17 @@ string unicode2ansi(const wstring &wstr)
 	return strTo;
 }
 
-void CWriter::Write(const write_job &j) {
-	try {
-		int flags = ios::out;
-		if (j.flags & F_WRITER_APPEND) {
-			flags |= ios::app;
-		}
-		else {
-			flags |= ios::trunc;
-		}
+void CWriter::Write(const write_job &j)
+{
+	int flags = ios::out;
+	if (j.flags & F_WRITER_APPEND) {
+		flags |= ios::app;
+	}
+	else {
+		flags |= ios::trunc;
+	}
 
+	try {
 		if (j.encoding == ENCODING_ANSI) {
 			fstream fs(j.file, flags);
 			fs << unicode2ansi(widen(j.data));
@@ -77,5 +79,15 @@ void CWriter::Write(const write_job &j) {
 	}
 	catch (exception const & e) {
 		console::complain("NPA: write failed", e);
+	}
+}
+
+void CWriter::QueueWrite(const write_job &j)
+{
+	try {
+		q.push(j);
+	}
+	catch (std::exception &e) {
+		console::complain("NPA: unable to push write job", e);
 	}
 }

@@ -4,8 +4,19 @@
 #include <mutex>
 #include <map>
 #include <condition_variable>
+#include <exception>
+
+#define QUEUE_MAX_SIZE	10000
 
 // producer-consumer queue taken from https://github.com/juanchopanza/cppblog/tree/master/Concurrency/Queue
+
+class queue_maxsize : public std::exception
+{
+	virtual const char* what() const throw()
+	{
+		return "queue exceeded maximum size";
+	}
+};
 
 template <typename T>
 class Queue
@@ -38,7 +49,9 @@ public:
 	void push(const T& item, bool lock = false)
 	{
 		std::unique_lock<std::mutex> mlock(mutex_);
-
+		if (queue_.size() >= max_size) {
+			throw queue_maxsize();
+		}
 		if (locked) {
 			return;
 		}
@@ -58,4 +71,5 @@ private:
 	std::mutex mutex_;
 	std::condition_variable cond_;
 	bool locked = false;
+	const size_t max_size = QUEUE_MAX_SIZE;
 };

@@ -27,7 +27,6 @@ class titleformat_hook_glob : public titleformat_hook {
 public:
 	bool process_field(titleformat_text_out * p_out, const char * p_name, t_size p_name_length, bool & p_found_flag);
 	bool process_function(titleformat_text_out * p_out, const char * p_name, t_size p_name_length, titleformat_hook_function_params * p_params, bool & p_found_flag);
-
 private:
 	static_api_ptr_t<playback_control> m_playback_control;
 	static_api_ptr_t<playlist_manager> m_playlist_manager;
@@ -47,13 +46,17 @@ typedef struct event_item_s {
 typedef struct instance_state_s {
 	pfc::string8 last_state;
 	bool ponce = false;
-	instance_state_s() {}
+
+	void update(pfc::string8 &state) {
+		ponce = true;
+		last_state = state;
+	}
 } instance_state;
 
 class CEventsBase : private play_callback_impl_base {
 public:
 
-	pfc::string8 format_title(titleformat_object::ptr &m_script) {
+	pfc::string8 format_title(const titleformat_object::ptr &m_script) {
 		pfc::string8 state;
 		if (m_playback_control->is_playing()) {
 			m_playback_control->playback_format_title(&titleformat_hook_glob(), state, m_script, NULL, playback_control::display_level_all);
@@ -124,6 +127,7 @@ private:
 
 	virtual void event_update(uint32_t event);
 	std::map<pfc::string8, event_item> m_instancemap[EVENT_COUNT];
+	std::map<pfc::string8, instance_state> c_instst;
 };
 
 class IEvents {
@@ -155,7 +159,7 @@ public:
 			return _evtostr[ev][0];
 		}
 		else {
-			return MSG_EVENT_UNKNOWN;
+			return pfc::string8(MSG_EVENT_UNKNOWN);
 		}
 	}
 
@@ -165,7 +169,7 @@ public:
 			return _evtostr[ev][1];
 		}
 		else {
-			return MSG_EVENT_UNKNOWN;
+			return pfc::string8(MSG_EVENT_UNKNOWN);
 		}
 	}
 

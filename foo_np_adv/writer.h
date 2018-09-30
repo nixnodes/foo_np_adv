@@ -7,8 +7,6 @@
 #include <atomic>
 #include <locale>
 #include <thread>
-#include <string>
-#include <codecvt>
 #include <fstream>
 
 #define F_WRITER_APPEND		(uint32_t) 0x00000001
@@ -17,14 +15,12 @@
 typedef struct write_job_s {
 	pfc::string8 file;
 	pfc::string8 data;
-	uint8_t flags = 0;
+	uint8_t flags;
 	uint8_t encoding = 0;
 
 	write_job_s(const pfc::string8 p_file, const pfc::string8 p_data, const uint8_t p_encoding, const uint8_t p_flags = 0) :
 		file(p_file), data(p_data), encoding(p_encoding), flags(p_flags) {}
 	write_job_s(const uint8_t p_flags) : flags(p_flags) {}
-	write_job_s() {}
-
 } write_job;
 
 class CWriter {
@@ -34,11 +30,16 @@ public:
 	}
 	~CWriter()
 	{
-		q.push(write_job(F_WRITER_ABORT), true);
-		t->join();
+		try {
+			q.push(write_job(F_WRITER_ABORT), true);
+			t->join();
+		}
+		catch (std::exception &) {
+			// ignore
+		}
 	}
 
-	void QueueWrite(const write_job &j) { q.push(j); }
+	void QueueWrite(const write_job &j);
 	static void Write(const write_job &j);
 
 private:
@@ -54,16 +55,17 @@ class IWriter {
 public:
 	static void Initialize() {
 		if (m_Writer == nullptr) {
-			p_Destroy = 0;
+			p_Destroy = false;
 			m_Writer = new CWriter();
 		}
 	}
 
 	static void Destroy() {
 		if (m_Writer != nullptr) {
-			p_Destroy = 1;
+			p_Destroy = true;
 			cv_quit.notify_all();
 			delete m_Writer;
+			m_Writer = nullptr;
 		}
 	}
 
@@ -71,19 +73,18 @@ public:
 		m_Writer->QueueWrite(j);
 	}
 
-	static void WriteAsync(const write_job &j, long long delay = 0) {
-		std::thread([](const write_job j, CWriter *c, long long t) {
-			std::unique_lock<std::mutex> lk(IWriter::cvq_mutex);
-			IWriter::cv_quit.wait_for(lk, std::chrono::milliseconds(t),
-				[] {return IWriter::p_Destroy == 1; }
+	static void WriteAsync(const write_job &j, const long long delay) {
+		std::thread([](const write_job j, CWriter *c, const long long t) {
+			std::unique_lock<std::mutex> lk(cvq_mutex);
+			cv_quit.wait_for(lk, std::chrono::milliseconds(t),
+				[] {return p_Destroy == 1; }
 			);
 			c->QueueWrite(j);
 		}, j, m_Writer, delay).detach();
 	}
 private:
 	static CWriter *m_Writer;
-	static std::atomic<int> p_Destroy;
-
+	static std::atomic<bool> p_Destroy;
 	static std::condition_variable cv_quit;
 	static std::mutex cvq_mutex;
 };

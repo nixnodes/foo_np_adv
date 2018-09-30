@@ -128,6 +128,7 @@ private:
 	CButton m_ButtonConfig;
 	CWindow m_WinDelaySpin;
 	CStatic m_StaticEncoding;
+	CStatic m_StaticInstance;
 
 	const preferences_page_callback::ptr m_callback;
 	titleformat_object::ptr m_script;

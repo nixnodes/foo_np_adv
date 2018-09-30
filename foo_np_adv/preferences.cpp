@@ -39,6 +39,7 @@ BOOL CNPAPreferences::OnInitDialog(CWindow, LPARAM)
 	m_CheckBoxChangesOnly = GetDlgItem(IDC_CHECK5);
 	m_CheckBoxClipboard = GetDlgItem(IDC_CHECK6);
 	m_CheckEnabled = GetDlgItem(IDC_ENABLED);
+	m_StaticInstance = GetDlgItem(IDC_STATIC_INSTANCE);
 
 	m_CheckEnabled.SetCheck(cfg_masterswitch ? 1 : 0);
 
@@ -196,6 +197,12 @@ void CNPAPreferences::OnComboInstanceSelChange(UINT, int, CWindow)
 	m_ButtonAddInstance.EnableWindow(false);
 	m_ButtonRemoveInstance.EnableWindow(true);
 	m_ButtonRenameInstance.EnableWindow(false);
+
+	/*
+	pfc::string8 title;
+	title << "Instance (" << item.name << ")";
+	uSetWindowText(m_StaticInstance, title);
+	*/
 
 	OnChanged();
 }
@@ -667,7 +674,7 @@ void CNPAPreferences::apply()
 	uGetDlgItemText(*this, IDC_ON_EXIT, str);
 	item.on_exit_str = str;
 	item.write_to_file = m_CheckBoxWriteToFile.IsChecked();
-	item.encoding = min((uint8_t)m_ComboBoxEncoding.GetCurSel(), ENCODING_COUNT - 1);
+	item.encoding = max(min((uint8_t)m_ComboBoxEncoding.GetCurSel(), ENCODING_COUNT - 1), 0);
 	item.log_mode = m_CheckBoxLogMode.IsChecked();
 	item.enable_delay = m_CheckBoxDelay.IsChecked();
 	item.on_exit = m_CheckBoxOnExit.IsChecked();
