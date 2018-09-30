@@ -55,6 +55,8 @@ BOOL CNPAPreferences::OnInitDialog(CWindow, LPARAM)
 	m_ComboBoxEncoding.AddString(_T("UCS-2 LE"));
 	m_ComboBoxEncoding.AddString(_T("UCS-2 BE BOM"));
 	m_ComboBoxEncoding.AddString(_T("UCS-2 LE BOM"));
+	m_ComboBoxEncoding.AddString(_T("OEM"));
+	m_ComboBoxEncoding.AddString(_T("MAC"));
 
 	PopulateContextList();
 

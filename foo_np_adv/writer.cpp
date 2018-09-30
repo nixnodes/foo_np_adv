@@ -23,7 +23,9 @@ locale CWriter::lmap[ENCODING_COUNT] = {
 	locale(locale{},
 		new codecvt_utf16<wchar_t, 0x10ffff, generate_header>),
 	locale(locale{},
-		new codecvt_utf16<wchar_t, 0x10ffff, (codecvt_mode)(generate_header | little_endian)>)
+		new codecvt_utf16<wchar_t, 0x10ffff, (codecvt_mode)(generate_header | little_endian)>),
+	locale{},
+	locale{},
 };
 
 using namespace std;
@@ -45,11 +47,11 @@ static wstring widen(const pfc::string8 &utf8) {
 	return convert.from_bytes(utf8);
 }
 
-static string unicode2ansi(const wstring &wstr)
+static string unicode2cp(UINT cp, const wstring &wstr)
 {
-	int size_needed = WideCharToMultiByte(CP_ACP, 0, &wstr[0], -1, NULL, 0, NULL, NULL);
+	int size_needed = WideCharToMultiByte(cp, 0, &wstr[0], -1, NULL, 0, NULL, NULL);
 	string strTo(size_needed, 0);
-	WideCharToMultiByte(CP_ACP, 0, &wstr[0], (int)wstr.size(), &strTo[0], size_needed, NULL, NULL);
+	WideCharToMultiByte(cp, 0, &wstr[0], (int)wstr.size(), &strTo[0], size_needed, NULL, NULL);
 	return strTo;
 }
 
@@ -66,7 +68,17 @@ void CWriter::Write(const write_job &j)
 	try {
 		if (j.encoding == ENCODING_ANSI) {
 			fstream fs(j.file, flags);
-			fs << unicode2ansi(widen(j.data));
+			fs << unicode2cp(CP_ACP, widen(j.data));
+			fs.close();
+		}
+		else if (j.encoding == ENCODING_OEM) {
+			fstream fs(j.file, flags);
+			fs << unicode2cp(CP_OEMCP, widen(j.data));
+			fs.close();
+		}
+		else if (j.encoding == ENCODING_MAC) {
+			fstream fs(j.file, flags);
+			fs << unicode2cp(CP_MACCP, widen(j.data));
 			fs.close();
 		}
 		else {
